@@ -9,6 +9,16 @@ import (
 
 /*
 |--------------------------------------------------------------------------
+| Internal Context Keys
+|--------------------------------------------------------------------------
+*/
+
+const (
+	RequestStartedAtKey contextKey = "hostmk.request.started_at"
+)
+
+/*
+|--------------------------------------------------------------------------
 | Middleware Configuration
 |--------------------------------------------------------------------------
 */
@@ -31,10 +41,6 @@ type MiddlewareConfig struct {
 |--------------------------------------------------------------------------
 | Tenant Middleware
 |--------------------------------------------------------------------------
-|
-| Resolves, validates and injects the tenant
-| context into every protected request.
-|
 */
 
 type TenantMiddleware struct {
@@ -51,18 +57,6 @@ func NewMiddleware(
 	config MiddlewareConfig,
 ) *TenantMiddleware {
 
-	if config.RequireTenant == false {
-		config.RequireTenant = true
-	}
-
-	if config.EnableValidation == false {
-		config.EnableValidation = true
-	}
-
-	if config.EnableIsolation == false {
-		config.EnableIsolation = true
-	}
-
 	if config.Validator == nil {
 		config.Validator = NewValidator()
 	}
@@ -78,8 +72,13 @@ func NewMiddleware(
 
 /*
 |--------------------------------------------------------------------------
-| HTTP Middleware
+| Main Middleware
 |--------------------------------------------------------------------------
+|
+| Resolves tenant information from the request,
+| validates the context and injects it into
+| the request context.
+|
 */
 
 func (m *TenantMiddleware) Handle(
@@ -105,7 +104,7 @@ func (m *TenantMiddleware) Handle(
 				return
 			}
 
-			tenantCtx, err := m.config.Resolver.ResolveRequest(
+			tenantContext, err := m.config.Resolver.ResolveRequest(
 				request,
 			)
 
@@ -133,7 +132,7 @@ func (m *TenantMiddleware) Handle(
 			if m.config.EnableValidation {
 
 				if err := m.config.Validator.ValidateContext(
-					tenantCtx,
+					tenantContext,
 				); err != nil {
 
 					m.writeError(
@@ -148,12 +147,12 @@ func (m *TenantMiddleware) Handle(
 
 			ctx := WithTenant(
 				request.Context(),
-				tenantCtx,
+				tenantContext,
 			)
 
 			ctx = context.WithValue(
 				ctx,
-				contextKey("hostmk.request.started_at"),
+				RequestStartedAtKey,
 				startedAt,
 			)
 
@@ -171,11 +170,15 @@ func (m *TenantMiddleware) Handle(
 
 /*
 |--------------------------------------------------------------------------
-| Tenant Extraction Helper
+| Current Tenant Helper
 |--------------------------------------------------------------------------
+|
+| Retrieves the active tenant context
+| from the request.
+|
 */
 
-func Tenant(
+func CurrentTenant(
 	request *http.Request,
 ) (*TenantContext, error) {
 
@@ -190,7 +193,7 @@ func Tenant(
 |--------------------------------------------------------------------------
 */
 
-func (m *TenantMiddleware) RequireTenant(
+func (m *TenantMiddleware) RequireValidTenant(
 	next http.Handler,
 ) http.Handler {
 
@@ -200,7 +203,7 @@ func (m *TenantMiddleware) RequireTenant(
 			request *http.Request,
 		) {
 
-			tenantCtx, err := Tenant(
+			tenantContext, err := CurrentTenant(
 				request,
 			)
 
@@ -215,7 +218,7 @@ func (m *TenantMiddleware) RequireTenant(
 				return
 			}
 
-			if !tenantCtx.IsValid() {
+			if !tenantContext.IsValid() {
 
 				m.writeError(
 					writer,
@@ -232,6 +235,60 @@ func (m *TenantMiddleware) RequireTenant(
 			)
 		},
 	)
+}
+
+/*
+|--------------------------------------------------------------------------
+| Ownership Validation Middleware
+|--------------------------------------------------------------------------
+|
+| Can be used by applications before
+| executing sensitive operations.
+|
+*/
+
+func (m *TenantMiddleware) ValidateOwnership(
+	request *http.Request,
+	resourceTenantID string,
+) error {
+
+	tenantContext, err := CurrentTenant(
+		request,
+	)
+
+	if err != nil {
+		return err
+	}
+
+	if m.config.Isolation == nil {
+		return ErrInvalidTenantContext
+	}
+
+	return m.config.Isolation.ValidateOwnership(
+		tenantContext,
+		resourceTenantID,
+		"resource",
+		"access",
+	)
+}
+
+/*
+|--------------------------------------------------------------------------
+| Request Helpers
+|--------------------------------------------------------------------------
+*/
+
+func RequestStartedAt(
+	request *http.Request,
+) (time.Time, bool) {
+
+	value := request.Context().Value(
+		RequestStartedAtKey,
+	)
+
+	startedAt, ok := value.(time.Time)
+
+	return startedAt, ok
 }
 
 /*
@@ -259,9 +316,10 @@ func (m *TenantMiddleware) writeError(
 		writer,
 	).Encode(
 		map[string]any{
-			"success": false,
-			"error":   message,
-			"status":  status,
+			"success":   false,
+			"error":     message,
+			"status":    status,
+			"timestamp": time.Now().UTC(),
 		},
 	)
 }

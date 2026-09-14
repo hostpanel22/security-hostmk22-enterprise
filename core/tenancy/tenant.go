@@ -5,9 +5,11 @@ import (
 )
 
 /*
-TenantStatus defines the allowed lifecycle states
-for a tenant within the platform.
+|--------------------------------------------------------------------------
+| Tenant Status
+|--------------------------------------------------------------------------
 */
+
 const (
 	StatusPending   = "pending"
 	StatusActive    = "active"
@@ -18,12 +20,15 @@ const (
 )
 
 /*
-Tenant represents a logical customer isolated
-inside a multi-tenant environment.
-
-A Tenant must never access resources that belong
-to another Tenant.
+|--------------------------------------------------------------------------
+| Tenant
+|--------------------------------------------------------------------------
+|
+| Represents a logical isolated customer
+| inside a multi-tenant platform.
+|
 */
+
 type Tenant struct {
 	ID string `json:"id"`
 
@@ -37,11 +42,11 @@ type Tenant struct {
 
 	OwnerID string `json:"owner_id"`
 
+	Plan string `json:"plan"`
+
 	Timezone string `json:"timezone"`
 
 	Country string `json:"country"`
-
-	Plan string `json:"plan"`
 
 	Metadata map[string]any `json:"metadata,omitempty"`
 
@@ -55,34 +60,32 @@ type Tenant struct {
 }
 
 /*
-IsActive determines whether the tenant
-is allowed to operate normally.
+|--------------------------------------------------------------------------
+| Status Helpers
+|--------------------------------------------------------------------------
 */
-func (t Tenant) IsActive() bool {
+
+func (t *Tenant) IsActive() bool {
 	return t.Status == StatusActive
 }
 
-/*
-IsPending indicates that the tenant
-has not yet been fully activated.
-*/
-func (t Tenant) IsPending() bool {
+func (t *Tenant) IsPending() bool {
 	return t.Status == StatusPending
 }
 
-/*
-IsSuspended indicates that access
-has been administratively suspended.
-*/
-func (t Tenant) IsSuspended() bool {
+func (t *Tenant) IsSuspended() bool {
 	return t.Status == StatusSuspended
 }
 
-/*
-IsExpired indicates that the tenant
-subscription or contract has expired.
-*/
-func (t Tenant) IsExpired() bool {
+func (t *Tenant) IsDisabled() bool {
+	return t.Status == StatusDisabled
+}
+
+func (t *Tenant) IsDeleted() bool {
+	return t.Status == StatusDeleted
+}
+
+func (t *Tenant) IsExpired() bool {
 	if t.Status == StatusExpired {
 		return true
 	}
@@ -91,38 +94,19 @@ func (t Tenant) IsExpired() bool {
 		return false
 	}
 
-	return time.Now().After(*t.ExpiresAt)
+	return time.Now().UTC().After(
+		*t.ExpiresAt,
+	)
 }
 
 /*
-IsDisabled indicates that the tenant
-is permanently disabled.
+|--------------------------------------------------------------------------
+| Platform Access
+|--------------------------------------------------------------------------
 */
-func (t Tenant) IsDisabled() bool {
-	return t.Status == StatusDisabled
-}
 
-/*
-IsDeleted indicates that the tenant
-has been logically removed.
-*/
-func (t Tenant) IsDeleted() bool {
-	return t.Status == StatusDeleted
-}
+func (t *Tenant) CanAccessPlatform() bool {
 
-/*
-HasCustomDomain determines whether
-the tenant is using a custom domain.
-*/
-func (t Tenant) HasCustomDomain() bool {
-	return t.Domain != ""
-}
-
-/*
-CanAccessPlatform determines whether
-the tenant can access protected resources.
-*/
-func (t Tenant) CanAccessPlatform() bool {
 	if t.IsDeleted() {
 		return false
 	}
@@ -143,31 +127,89 @@ func (t Tenant) CanAccessPlatform() bool {
 }
 
 /*
-RequiresReview determines whether
-security validation should be reinforced.
+|--------------------------------------------------------------------------
+| Domain Helpers
+|--------------------------------------------------------------------------
 */
-func (t Tenant) RequiresReview() bool {
-	return t.IsPending() ||
-		t.IsSuspended() ||
-		t.IsExpired()
+
+func (t *Tenant) HasCustomDomain() bool {
+	return t.Domain != ""
 }
 
 /*
-ToMap converts the tenant into a generic map
-for logging, auditing or serialization layers.
+|--------------------------------------------------------------------------
+| Lifecycle Helpers
+|--------------------------------------------------------------------------
 */
-func (t Tenant) ToMap() map[string]any {
+
+func (t *Tenant) Suspend() {
+	now := time.Now().UTC()
+
+	t.Status = StatusSuspended
+	t.SuspendedAt = &now
+}
+
+func (t *Tenant) Activate() {
+	t.Status = StatusActive
+	t.SuspendedAt = nil
+}
+
+func (t *Tenant) Disable() {
+	t.Status = StatusDisabled
+}
+
+func (t *Tenant) MarkDeleted() {
+	t.Status = StatusDeleted
+}
+
+func (t *Tenant) MarkExpired() {
+	t.Status = StatusExpired
+}
+
+/*
+|--------------------------------------------------------------------------
+| Validation
+|--------------------------------------------------------------------------
+*/
+
+func (t *Tenant) Validate() error {
+
+	if t.ID == "" {
+		return ErrInvalidTenantIdentifier
+	}
+
+	if t.Name == "" {
+		return ErrTenantValidationFailed
+	}
+
+	if t.Slug == "" {
+		return ErrTenantValidationFailed
+	}
+
+	return nil
+}
+
+/*
+|--------------------------------------------------------------------------
+| Audit Serialization
+|--------------------------------------------------------------------------
+*/
+
+func (t *Tenant) ToMap() map[string]any {
+
 	return map[string]any{
-		"id":         t.ID,
-		"name":       t.Name,
-		"slug":       t.Slug,
-		"domain":     t.Domain,
-		"status":     t.Status,
-		"owner_id":   t.OwnerID,
-		"timezone":   t.Timezone,
-		"country":    t.Country,
-		"plan":       t.Plan,
-		"created_at": t.CreatedAt,
-		"updated_at": t.UpdatedAt,
+		"id":           t.ID,
+		"name":         t.Name,
+		"slug":         t.Slug,
+		"domain":       t.Domain,
+		"status":       t.Status,
+		"owner_id":     t.OwnerID,
+		"plan":         t.Plan,
+		"timezone":     t.Timezone,
+		"country":      t.Country,
+		"created_at":   t.CreatedAt,
+		"updated_at":   t.UpdatedAt,
+		"suspended_at": t.SuspendedAt,
+		"expires_at":   t.ExpiresAt,
 	}
 }
