@@ -113,6 +113,12 @@ func (s *Secret) Rotate(
 
 	s.Value = newValue
 
+	// Important :
+	// après rotation la nouvelle valeur
+	// est en clair et devra être
+	// rechiffrée par Vault.
+	s.Encrypted = false
+
 	s.Version++
 
 	now := time.Now().UTC()
@@ -122,6 +128,36 @@ func (s *Secret) Rotate(
 	s.UpdatedAt = now
 
 	return nil
+}
+
+func (s *Secret) Rename(
+	name string,
+) error {
+
+	name = strings.TrimSpace(
+		name,
+	)
+
+	if name == "" {
+		return ErrEmptySecretName
+	}
+
+	s.Name = name
+
+	s.Touch()
+
+	return nil
+}
+
+func (s *Secret) ChangeType(
+	secretType string,
+) {
+
+	s.Type = normalize(
+		secretType,
+	)
+
+	s.Touch()
 }
 
 func (s *Secret) MarkEncrypted() {
@@ -141,6 +177,18 @@ func (s *Secret) MarkDecrypted() {
 func (s *Secret) IsEncrypted() bool {
 
 	return s.Encrypted
+}
+
+func (s *Secret) IsRotated() bool {
+
+	return s.RotatedAt != nil
+}
+
+func (s *Secret) Age() time.Duration {
+
+	return time.Since(
+		s.CreatedAt,
+	)
 }
 
 func (s *Secret) Clone() *Secret {
@@ -169,6 +217,17 @@ func (s *Secret) BelongsToTenant(
 		s.TenantID,
 	) == strings.TrimSpace(
 		tenantID,
+	)
+}
+
+func (s *Secret) IsType(
+	secretType string,
+) bool {
+
+	return normalize(
+		s.Type,
+	) == normalize(
+		secretType,
 	)
 }
 
