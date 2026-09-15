@@ -1,0 +1,39 @@
+HostMK-Security-Framework
+
+NOTICE REGARDING OPEN SOURCE AND ENTERPRISE COMPONENTS
+═══════════════════════════════════════════════════════════════════════
+
+This repository contains both Open Source and Enterprise Edition
+components.
+
+The Apache License 2.0 applies ONLY to files located outside the /ee/
+directory.
+
+The /ee/ directory contains proprietary Enterprise Edition software
+and is governed exclusively by the Enterprise License located at:
+
+    /ee/LICENSE
+
+Files located under /ee/ are NOT licensed under Apache 2.0.
+
+Enterprise Edition modules may include:
+
+• SSO Integrations
+• Advanced Audit Reporting
+• Compliance Modules
+• Commercial Security Extensions
+• Premium Security Features
+
+For Enterprise licensing inquiries:
+
+contact@hostmk.com
+
+═══════════════════════════════════════════════════════════════════════
+
+Apache License
+Version 2.0, January 2004
+http://www.apache.org/licenses/
+
+TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
+
+...

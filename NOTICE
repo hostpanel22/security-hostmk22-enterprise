@@ -1,0 +1,15 @@
+HostMK-Security-Framework
+
+Copyright (c) HostMK
+
+This repository contains:
+
+- Open Source components licensed under Apache License 2.0
+- Enterprise Edition components licensed separately under /ee/LICENSE
+
+The Apache License 2.0 does not apply to files contained in the /ee/
+directory.
+
+For commercial licensing:
+
+contact@hostmk.com

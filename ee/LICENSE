@@ -1,0 +1,205 @@
+⚠️⚠️⚠️ WARNING: COMMERCIAL & PROPRIETARY CODE AHEAD ⚠️⚠️⚠️
+
+🛑 STOP!
+
+The files contained within the /ee directory are NOT Open Source.
+
+These files belong exclusively to the HostMK Enterprise Edition and are
+protected by copyright law, intellectual property law, and international
+software licensing agreements.
+
+The Apache License 2.0 located at the root of this repository DOES NOT APPLY
+to any file contained within the /ee directory.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🏢 HOSTMK ENTERPRISE LICENSE
+
+Copyright (c) HostMK.
+All Rights Reserved.
+
+This software is licensed, NOT sold.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📌 SCOPE
+
+This license governs all files, source code, assets, documentation,
+configurations, scripts, libraries, and modules located within:
+
+    /ee/
+
+including all of its subdirectories.
+
+Examples:
+
+    /ee/sso_integration
+    /ee/audit_logs
+    /ee/internal
+    /ee/*
+    /ee/**/*
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ YOU MAY
+
+Subject to compliance with this license:
+
+✔ View source code for evaluation purposes.
+
+✔ Review implementation details.
+
+✔ Test Enterprise Edition functionality
+  in development or evaluation environments.
+
+✔ Use trial versions when explicitly authorized.
+
+✔ Perform security reviews and audits
+  solely for evaluation purposes.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+❌ YOU MAY NOT
+
+Without a valid commercial agreement from HostMK:
+
+✘ Use Enterprise Edition modules in production.
+
+✘ Redistribute source code.
+
+✘ Publish source code publicly.
+
+✘ Upload source code to public repositories.
+
+✘ Share source code with third parties.
+
+✘ Sell source code.
+
+✘ Lease source code.
+
+✘ Sublicense source code.
+
+✘ Create competing commercial products
+  derived from Enterprise Edition code.
+
+✘ Remove copyright notices.
+
+✘ Remove license notices.
+
+✘ Remove attribution information.
+
+✘ Remove security mechanisms.
+
+✘ Remove usage restrictions.
+
+✘ Disable license verification systems.
+
+✘ Circumvent licensing mechanisms.
+
+✘ Reverse engineer licensing protections.
+
+✘ Modify Enterprise Edition code and redistribute it.
+
+✘ Integrate Enterprise Edition code into another
+  commercial or open-source project.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🔐 LICENSE ENFORCEMENT
+
+HostMK Enterprise Edition may include:
+
+• License verification systems
+• Activation mechanisms
+• Subscription validation
+• Usage enforcement controls
+• Security monitoring components
+
+Any attempt to bypass, disable, alter, remove, interfere with,
+or circumvent these mechanisms constitutes a violation of this license.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🧠 INTELLECTUAL PROPERTY
+
+All intellectual property rights remain the exclusive property of HostMK.
+
+No ownership rights are transferred by access to, download of,
+or use of the software.
+
+All rights not expressly granted under this license are reserved.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📄 OPEN SOURCE EXCEPTION
+
+Only files located outside the /ee directory are governed by the
+repository's Open Source license.
+
+The following are Open Source:
+
+    /core
+    /docs
+    /examples
+    /tests
+
+unless otherwise specified.
+
+The following are Proprietary:
+
+    /ee
+    /ee/*
+    /ee/**/*
+
+without exception.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+⚖️ TERMINATION
+
+Any violation of this license immediately terminates all rights granted.
+
+Upon termination you must:
+
+• Stop using the software.
+• Stop distributing the software.
+• Remove all copies under your control.
+• Remove all deployed instances.
+
+HostMK reserves all available legal remedies.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🛡 WARRANTY DISCLAIMER
+
+THE SOFTWARE IS PROVIDED "AS IS".
+
+TO THE MAXIMUM EXTENT PERMITTED BY LAW,
+HOSTMK DISCLAIMS ALL WARRANTIES, INCLUDING:
+
+• MERCHANTABILITY
+• FITNESS FOR A PARTICULAR PURPOSE
+• NON-INFRINGEMENT
+
+HOSTMK SHALL NOT BE LIABLE FOR ANY DAMAGES,
+LOSSES, OR CLAIMS ARISING FROM USE OF THE SOFTWARE.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📧 COMMERCIAL LICENSING
+
+Production use requires a valid commercial license.
+
+Enterprise Sales:
+contact@hostmk.com
+
+Business Inquiries:
+contact@hostmk.com
+
+Licensing Questions:
+contact@hostmk.com
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+© HostMK Enterprise Edition
+All Rights Reserved.
