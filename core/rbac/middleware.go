@@ -220,6 +220,10 @@ func RequirePermission(
 	permission string,
 ) func(http.Handler) http.Handler {
 
+	permission = normalize(
+		permission,
+	)
+
 	return func(
 		next http.Handler,
 	) http.Handler {
