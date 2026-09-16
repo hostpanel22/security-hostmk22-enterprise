@@ -1,5 +1,4 @@
 import { HostMKClient } from "./client.js";
-
 import type {
   ApiResponse,
   FraudAlert,
@@ -7,7 +6,19 @@ import type {
   PaginatedResponse,
 } from "./types.js";
 
-export class FraudService {
+export interface CreateFraudAlertRequest {
+  tenantId: string;
+  userId: string;
+  riskScore: number;
+  reason: string;
+  metadata?: Record<string, unknown>;
+}
+
+export interface UpdateRiskScoreRequest {
+  riskScore: number;
+}
+
+export class FraudAPI {
   private readonly client: HostMKClient;
 
   constructor(
@@ -16,7 +27,39 @@ export class FraudService {
     this.client = client;
   }
 
-  public async list(
+  /**
+   * Create fraud alert
+   */
+  public async createAlert(
+    payload: CreateFraudAlertRequest,
+  ): Promise<ApiResponse<FraudAlert>> {
+    return this.client.post<
+      ApiResponse<FraudAlert>
+    >(
+      "/fraud/alerts",
+      payload,
+    );
+  }
+
+  /**
+   * Get alert by ID
+   */
+  public async getAlert(
+    id: string,
+  ): Promise<ApiResponse<FraudAlert>> {
+    return this.client.get<
+      ApiResponse<FraudAlert>
+    >(
+      `/fraud/alerts/${encodeURIComponent(
+        id,
+      )}`,
+    );
+  }
+
+  /**
+   * List alerts
+   */
+  public async listAlerts(
     query?: FraudQuery,
   ): Promise<
     PaginatedResponse<FraudAlert>
@@ -50,89 +93,123 @@ export class FraudService {
       );
     }
 
-    if (
-      query?.page !== undefined
-    ) {
+    if (query?.page) {
       params.set(
         "page",
         String(query.page),
       );
     }
 
-    if (
-      query?.limit !== undefined
-    ) {
+    if (query?.limit) {
       params.set(
         "limit",
         String(query.limit),
       );
     }
 
-    const queryString =
-      params.toString();
+    const suffix =
+      params.toString().length > 0
+        ? `?${params.toString()}`
+        : "";
 
     return this.client.get<
       PaginatedResponse<FraudAlert>
     >(
-      queryString.length > 0
-        ? `/fraud?${queryString}`
-        : "/fraud",
+      `/fraud/alerts${suffix}`,
     );
   }
 
-  public async get(
+  /**
+   * Delete alert
+   */
+  public async deleteAlert(
     id: string,
-  ): Promise<
-    ApiResponse<FraudAlert>
-  > {
-    if (!id.trim()) {
-      throw new Error(
-        "fraud alert id is required",
-      );
-    }
-
-    return this.client.get<
-      ApiResponse<FraudAlert>
-    >(
-      `/fraud/${encodeURIComponent(
-        id,
-      )}`,
-    );
-  }
-
-  public async create(
-    alert: Omit<
-      FraudAlert,
-      "id" | "createdAt"
-    >,
-  ): Promise<
-    ApiResponse<FraudAlert>
-  > {
-    return this.client.post<
-      ApiResponse<FraudAlert>
-    >(
-      "/fraud",
-      alert,
-    );
-  }
-
-  public async delete(
-    id: string,
-  ): Promise<
-    ApiResponse<boolean>
-  > {
-    if (!id.trim()) {
-      throw new Error(
-        "fraud alert id is required",
-      );
-    }
-
+  ): Promise<ApiResponse<boolean>> {
     return this.client.delete<
       ApiResponse<boolean>
     >(
-      `/fraud/${encodeURIComponent(
+      `/fraud/alerts/${encodeURIComponent(
         id,
       )}`,
+    );
+  }
+
+  /**
+   * Update risk score
+   */
+  public async updateRiskScore(
+    id: string,
+    payload: UpdateRiskScoreRequest,
+  ): Promise<ApiResponse<FraudAlert>> {
+    return this.client.put<
+      ApiResponse<FraudAlert>
+    >(
+      `/fraud/alerts/${encodeURIComponent(
+        id,
+      )}/risk-score`,
+      payload,
+    );
+  }
+
+  /**
+   * Resolve alert
+   */
+  public async resolveAlert(
+    id: string,
+  ): Promise<ApiResponse<boolean>> {
+    return this.client.post<
+      ApiResponse<boolean>
+    >(
+      `/fraud/alerts/${encodeURIComponent(
+        id,
+      )}/resolve`,
+    );
+  }
+
+  /**
+   * Reopen alert
+   */
+  public async reopenAlert(
+    id: string,
+  ): Promise<ApiResponse<boolean>> {
+    return this.client.post<
+      ApiResponse<boolean>
+    >(
+      `/fraud/alerts/${encodeURIComponent(
+        id,
+      )}/reopen`,
+    );
+  }
+
+  /**
+   * Get user alerts
+   */
+  public async getUserAlerts(
+    userId: string,
+  ): Promise<
+    PaginatedResponse<FraudAlert>
+  > {
+    return this.client.get<
+      PaginatedResponse<FraudAlert>
+    >(
+      `/fraud/users/${encodeURIComponent(
+        userId,
+      )}/alerts`,
+    );
+  }
+
+  /**
+   * Get high-risk alerts
+   */
+  public async getHighRiskAlerts(
+    threshold = 80,
+  ): Promise<
+    PaginatedResponse<FraudAlert>
+  > {
+    return this.client.get<
+      PaginatedResponse<FraudAlert>
+    >(
+      `/fraud/high-risk?threshold=${threshold}`,
     );
   }
 }
