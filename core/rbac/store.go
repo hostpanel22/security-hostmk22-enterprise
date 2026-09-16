@@ -2,7 +2,6 @@ package rbac
 
 import (
 	"context"
-	"strings"
 	"sync"
 )
 
@@ -80,12 +79,14 @@ func (s *MemoryStore) SaveRole(
 		return ErrInvalidRole
 	}
 
+	if err := role.Validate(); err != nil {
+		return err
+	}
+
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	s.roles[
-		normalize(role.Name),
-	] = role.Clone()
+	s.roles[normalize(role.Name)] = role.Clone()
 
 	return nil
 }
@@ -176,12 +177,14 @@ func (s *MemoryStore) SavePermission(
 		return ErrInvalidPermission
 	}
 
+	if err := permission.Validate(); err != nil {
+		return err
+	}
+
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	s.permissions[
-		normalize(permission.Name),
-	] = permission.Clone()
+	s.permissions[normalize(permission.Name)] = permission.Clone()
 
 	return nil
 }
@@ -279,15 +282,4 @@ func (s *MemoryStore) Clear(
 	)
 
 	return nil
-}
-
-func normalize(
-	value string,
-) string {
-
-	return strings.ToLower(
-		strings.TrimSpace(
-			value,
-		),
-	)
 }

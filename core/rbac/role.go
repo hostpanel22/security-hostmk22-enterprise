@@ -16,11 +16,9 @@ type Role struct {
 
 	Description string `json:"description"`
 
-	Permissions []*Permission `json:"permissions"`
+	Permissions []string `json:"permissions"`
 
 	ParentRoles []string `json:"parent_roles"`
-
-	System bool `json:"system"`
 
 	CreatedAt time.Time `json:"created_at"`
 
@@ -51,7 +49,7 @@ func NewRole(
 		),
 
 		Permissions: make(
-			[]*Permission,
+			[]string,
 			0,
 		),
 
@@ -59,8 +57,6 @@ func NewRole(
 			[]string,
 			0,
 		),
-
-		System: false,
 
 		CreatedAt: now,
 
@@ -75,6 +71,13 @@ func (r *Role) Validate() error {
 	}
 
 	if strings.TrimSpace(
+		r.ID,
+	) == "" {
+
+		return ErrEmptyRoleID
+	}
+
+	if strings.TrimSpace(
 		r.Name,
 	) == "" {
 
@@ -82,15 +85,6 @@ func (r *Role) Validate() error {
 	}
 
 	return nil
-}
-
-func (r *Role) Touch() {
-
-	if r == nil {
-		return
-	}
-
-	r.UpdatedAt = time.Now().UTC()
 }
 
 func (r *Role) Clone() *Role {
@@ -101,23 +95,10 @@ func (r *Role) Clone() *Role {
 
 	clone := *r
 
-	clone.Permissions = make(
-		[]*Permission,
-		0,
-		len(r.Permissions),
+	clone.Permissions = append(
+		[]string{},
+		r.Permissions...,
 	)
-
-	for _, permission := range r.Permissions {
-
-		if permission == nil {
-			continue
-		}
-
-		clone.Permissions = append(
-			clone.Permissions,
-			permission.Clone(),
-		)
-	}
 
 	clone.ParentRoles = append(
 		[]string{},
@@ -127,189 +108,13 @@ func (r *Role) Clone() *Role {
 	return &clone
 }
 
-func (r *Role) AddPermission(
-	permission *Permission,
-) error {
+func (r *Role) Touch() {
 
 	if r == nil {
-		return ErrInvalidRole
+		return
 	}
 
-	if permission == nil {
-		return ErrInvalidPermission
-	}
-
-	for _, existing := range r.Permissions {
-
-		if existing == nil {
-			continue
-		}
-
-		if existing.Equals(
-			permission,
-		) {
-
-			return ErrPermissionAlreadyAssigned
-		}
-	}
-
-	r.Permissions = append(
-		r.Permissions,
-		permission.Clone(),
-	)
-
-	r.Touch()
-
-	return nil
-}
-
-func (r *Role) RemovePermission(
-	resource string,
-	action string,
-) error {
-
-	if r == nil {
-		return ErrInvalidRole
-	}
-
-	filtered := make(
-		[]*Permission,
-		0,
-	)
-
-	removed := false
-
-	for _, permission := range r.Permissions {
-
-		if permission == nil {
-			continue
-		}
-
-		if permission.Matches(
-			resource,
-			action,
-		) {
-
-			removed = true
-			continue
-		}
-
-		filtered = append(
-			filtered,
-			permission,
-		)
-	}
-
-	if !removed {
-		return ErrPermissionNotAssigned
-	}
-
-	r.Permissions = filtered
-
-	r.Touch()
-
-	return nil
-}
-
-func (r *Role) HasPermission(
-	resource string,
-	action string,
-) bool {
-
-	if r == nil {
-		return false
-	}
-
-	for _, permission := range r.Permissions {
-
-		if permission == nil {
-			continue
-		}
-
-		if permission.Matches(
-			resource,
-			action,
-		) {
-
-			return true
-		}
-	}
-
-	return false
-}
-
-func (r *Role) AddParentRole(
-	roleName string,
-) error {
-
-	roleName = normalize(
-		roleName,
-	)
-
-	if roleName == "" {
-		return ErrRoleNotFound
-	}
-
-	for _, existing := range r.ParentRoles {
-
-		if normalize(
-			existing,
-		) == roleName {
-
-			return ErrRoleAlreadyAssigned
-		}
-	}
-
-	r.ParentRoles = append(
-		r.ParentRoles,
-		roleName,
-	)
-
-	r.Touch()
-
-	return nil
-}
-
-func (r *Role) RemoveParentRole(
-	roleName string,
-) error {
-
-	roleName = normalize(
-		roleName,
-	)
-
-	filtered := make(
-		[]string,
-		0,
-	)
-
-	removed := false
-
-	for _, existing := range r.ParentRoles {
-
-		if normalize(
-			existing,
-		) == roleName {
-
-			removed = true
-			continue
-		}
-
-		filtered = append(
-			filtered,
-			existing,
-		)
-	}
-
-	if !removed {
-		return ErrRoleNotAssigned
-	}
-
-	r.ParentRoles = filtered
-
-	r.Touch()
-
-	return nil
+	r.UpdatedAt = time.Now().UTC()
 }
 
 func (r *Role) BelongsToTenant(
@@ -327,6 +132,95 @@ func (r *Role) BelongsToTenant(
 	)
 }
 
+func (r *Role) UpdateDescription(
+	description string,
+) {
+
+	if r == nil {
+		return
+	}
+
+	r.Description = strings.TrimSpace(
+		description,
+	)
+
+	r.Touch()
+}
+
+func (r *Role) AddPermission(
+	permission string,
+) error {
+
+	if r == nil {
+		return ErrInvalidRole
+	}
+
+	permission = normalize(
+		permission,
+	)
+
+	if permission == "" {
+		return ErrInvalidPermission
+	}
+
+	if containsString(
+		r.Permissions,
+		permission,
+	) {
+
+		return ErrPermissionAlreadyAssigned
+	}
+
+	r.Permissions = append(
+		r.Permissions,
+		permission,
+	)
+
+	r.Touch()
+
+	return nil
+}
+
+func (r *Role) RemovePermission(
+	permission string,
+) error {
+
+	if r == nil {
+		return ErrInvalidRole
+	}
+
+	if !containsString(
+		r.Permissions,
+		permission,
+	) {
+
+		return ErrPermissionNotAssigned
+	}
+
+	r.Permissions = removeString(
+		r.Permissions,
+		permission,
+	)
+
+	r.Touch()
+
+	return nil
+}
+
+func (r *Role) HasPermission(
+	permission string,
+) bool {
+
+	if r == nil {
+		return false
+	}
+
+	return containsString(
+		r.Permissions,
+		permission,
+	)
+}
+
 func (r *Role) PermissionCount() int {
 
 	if r == nil {
@@ -335,6 +229,87 @@ func (r *Role) PermissionCount() int {
 
 	return len(
 		r.Permissions,
+	)
+}
+
+func (r *Role) AddParentRole(
+	roleName string,
+) error {
+
+	if r == nil {
+		return ErrInvalidRole
+	}
+
+	roleName = normalize(
+		roleName,
+	)
+
+	if roleName == "" {
+		return ErrInvalidRole
+	}
+
+	if normalize(
+		r.Name,
+	) == roleName {
+
+		return ErrRoleInheritanceLoop
+	}
+
+	if containsString(
+		r.ParentRoles,
+		roleName,
+	) {
+
+		return ErrRoleAlreadyAssigned
+	}
+
+	r.ParentRoles = append(
+		r.ParentRoles,
+		roleName,
+	)
+
+	r.Touch()
+
+	return nil
+}
+
+func (r *Role) RemoveParentRole(
+	roleName string,
+) error {
+
+	if r == nil {
+		return ErrInvalidRole
+	}
+
+	if !containsString(
+		r.ParentRoles,
+		roleName,
+	) {
+
+		return ErrRoleNotAssigned
+	}
+
+	r.ParentRoles = removeString(
+		r.ParentRoles,
+		roleName,
+	)
+
+	r.Touch()
+
+	return nil
+}
+
+func (r *Role) HasParentRole(
+	roleName string,
+) bool {
+
+	if r == nil {
+		return false
+	}
+
+	return containsString(
+		r.ParentRoles,
+		roleName,
 	)
 }
 
@@ -349,22 +324,30 @@ func (r *Role) ParentRoleCount() int {
 	)
 }
 
-func (r *Role) MarkSystem() {
+func (r *Role) ClearPermissions() {
 
 	if r == nil {
 		return
 	}
 
-	r.System = true
+	r.Permissions = make(
+		[]string,
+		0,
+	)
 
 	r.Touch()
 }
 
-func (r *Role) IsSystem() bool {
+func (r *Role) ClearParentRoles() {
 
 	if r == nil {
-		return false
+		return
 	}
 
-	return r.System
+	r.ParentRoles = make(
+		[]string,
+		0,
+	)
+
+	r.Touch()
 }

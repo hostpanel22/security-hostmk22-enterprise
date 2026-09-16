@@ -71,6 +71,13 @@ func (p *Permission) Validate() error {
 	}
 
 	if strings.TrimSpace(
+		p.ID,
+	) == "" {
+
+		return ErrInvalidPermission
+	}
+
+	if strings.TrimSpace(
 		p.Name,
 	) == "" {
 
@@ -171,6 +178,51 @@ func (p *Permission) UpdateDescription(
 	p.Touch()
 }
 
+func (p *Permission) UpdateName(
+	name string,
+) {
+
+	if p == nil {
+		return
+	}
+
+	p.Name = normalize(
+		name,
+	)
+
+	p.Touch()
+}
+
+func (p *Permission) UpdateResource(
+	resource string,
+) {
+
+	if p == nil {
+		return
+	}
+
+	p.Resource = normalize(
+		resource,
+	)
+
+	p.Touch()
+}
+
+func (p *Permission) UpdateAction(
+	action string,
+) {
+
+	if p == nil {
+		return
+	}
+
+	p.Action = normalize(
+		action,
+	)
+
+	p.Touch()
+}
+
 func (p *Permission) IsResource(
 	resource string,
 ) bool {
@@ -212,18 +264,48 @@ func (p *Permission) Matches(
 
 	return p.IsResource(
 		resource,
-	) && p.IsAction(
-		action,
+	) &&
+		p.IsAction(
+			action,
+		)
+}
+
+func (p *Permission) IsReadOnly() bool {
+
+	if p == nil {
+		return false
+	}
+
+	return p.IsAction(
+		"read",
 	)
 }
 
-func normalize(
-	value string,
-) string {
+func (p *Permission) IsWrite() bool {
 
-	return strings.ToLower(
-		strings.TrimSpace(
-			value,
-		),
-	)
+	if p == nil {
+		return false
+	}
+
+	switch normalize(
+		p.Action,
+	) {
+	case "create",
+		"update",
+		"delete",
+		"write":
+
+		return true
+	}
+
+	return false
+}
+
+func (p *Permission) String() string {
+
+	if p == nil {
+		return ""
+	}
+
+	return p.Key()
 }
