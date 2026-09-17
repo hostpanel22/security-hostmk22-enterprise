@@ -1,0 +1,47 @@
+# Source code
+src/
+
+# Tests
+tests/
+
+# Examples
+examples/
+
+# CI/CD
+.github/
+
+# Development files
+.vscode/
+.idea/
+
+# Dependencies
+node_modules/
+
+# Coverage
+coverage/
+.vite/
+vitest-report/
+.nyc_output/
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Build metadata
+tsconfig.json
+*.tsbuildinfo
+
+# Local archives
+*.tgz
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
