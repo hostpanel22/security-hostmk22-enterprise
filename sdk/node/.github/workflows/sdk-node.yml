@@ -1,0 +1,51 @@
+name: SDK Node CI
+
+on:
+  push:
+    paths:
+      - "sdk/node/**"
+      - ".github/workflows/sdk-node.yml"
+
+  pull_request:
+    paths:
+      - "sdk/node/**"
+      - ".github/workflows/sdk-node.yml"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: sdk/node
+
+    strategy:
+      matrix:
+        node-version:
+          - 22.x
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: npm
+          cache-dependency-path: sdk/node/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Type Check
+        run: npm run typecheck
+
+      - name: Run Tests
+        run: npm run test
+
+      - name: Build SDK
+        run: npm run build
+
+      - name: Verify Package
+        run: npm pack
