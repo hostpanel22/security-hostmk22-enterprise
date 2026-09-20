@@ -1,0 +1,102 @@
+#################################################
+# HostMK Security SDK PHP
+#################################################
+
+#
+# Composer
+#
+vendor/
+composer.lock
+
+#
+# PHPUnit
+#
+.phpunit.cache/
+coverage/
+coverage.xml
+
+#
+# PHPStan
+#
+phpstan.neon.cache
+.phpstan/
+
+#
+# Environment
+#
+.env
+.env.*
+!.env.example
+
+#
+# Logs
+#
+*.log
+
+#
+# IDE
+#
+.vscode/
+.idea/
+
+#
+# OS
+#
+.DS_Store
+Thumbs.db
+desktop.ini
+
+#
+# Temporary Files
+#
+tmp/
+temp/
+.cache/
+
+#
+# Build Artifacts
+#
+build/
+dist/
+
+#
+# Archives
+#
+*.zip
+*.tar
+*.tar.gz
+*.tgz
+
+#
+# Security
+#
+secrets/
+credentials/
+*.pem
+*.key
+*.crt
+*.p12
+
+#
+# PHPUnit Reports
+#
+junit.xml
+test-results.xml
+
+#
+# PHP CS Fixer
+#
+.php-cs-fixer.cache
+
+#
+# Rector
+#
+rector.php.cache
+
+#
+# Misc
+#
+*.bak
+*.swp
+*.swo
+*~

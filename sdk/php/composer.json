@@ -1,0 +1,54 @@
+{
+  "name": "hostmk/security-sdk",
+  "description": "Official PHP SDK for HostMK Security Framework",
+  "type": "library",
+  "license": "MIT",
+  "keywords": [
+    "hostmk",
+    "security",
+    "audit",
+    "fraud",
+    "permissions",
+    "tenancy",
+    "multi-tenant",
+    "sdk"
+  ],
+  "homepage": "https://github.com/azezaz/HostMK-Security-Framework",
+  "support": {
+    "issues": "https://github.com/azezaz/HostMK-Security-Framework/issues",
+    "source": "https://github.com/azezaz/HostMK-Security-Framework"
+  },
+  "authors": [
+    {
+      "name": "HostMK Team"
+    }
+  ],
+  "require": {
+    "php": "^8.2",
+    "ext-json": "*"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^11.5",
+    "phpstan/phpstan": "^2.1"
+  },
+  "autoload": {
+    "psr-4": {
+      "HostMK\\Security\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "HostMK\\Security\\Tests\\": "tests/"
+    }
+  },
+  "scripts": {
+    "test": "phpunit",
+    "analyse": "phpstan analyse src tests",
+    "check": [
+      "@analyse",
+      "@test"
+    ]
+  },
+  "minimum-stability": "stable",
+  "prefer-stable": true
+}
