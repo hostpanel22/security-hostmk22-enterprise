@@ -1,0 +1,119 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+
+  "extends": [
+    "config:recommended",
+    ":dependencyDashboard",
+    ":semanticCommits",
+    ":separateMajorReleases",
+    ":timezone(Europe/Paris)"
+  ],
+
+  "labels": [
+    "dependencies"
+  ],
+
+  "assignees": [
+    "hostmk22"
+  ],
+
+  "reviewers": [
+    "hostmk22"
+  ],
+
+  "prConcurrentLimit": 10,
+
+  "prHourlyLimit": 5,
+
+  "rangeStrategy": "bump",
+
+  "rebaseWhen": "behind-base-branch",
+
+  "dependencyDashboard": true,
+
+  "dependencyDashboardTitle": "HostMK Dependency Dashboard",
+
+  "semanticCommits": "enabled",
+
+  "semanticCommitType": "chore",
+
+  "semanticCommitScope": "deps",
+
+  "lockFileMaintenance": {
+    "enabled": true,
+    "schedule": [
+      "before 5am on monday"
+    ]
+  },
+
+  "packageRules": [
+    {
+      "matchManagers": [
+        "composer"
+      ],
+      "groupName": "php dependencies",
+      "labels": [
+        "php",
+        "dependencies"
+      ]
+    },
+    {
+      "matchManagers": [
+        "npm"
+      ],
+      "groupName": "nodejs dependencies",
+      "labels": [
+        "nodejs",
+        "dependencies"
+      ]
+    },
+    {
+      "matchManagers": [
+        "pip_requirements",
+        "poetry",
+        "pep621"
+      ],
+      "groupName": "python dependencies",
+      "labels": [
+        "python",
+        "dependencies"
+      ]
+    },
+    {
+      "matchUpdateTypes": [
+        "major"
+      ],
+      "automerge": false
+    },
+    {
+      "matchUpdateTypes": [
+        "minor",
+        "patch"
+      ],
+      "automerge": true
+    }
+  ],
+
+  "composer": {
+    "enabled": true
+  },
+
+  "npm": {
+    "enabled": true
+  },
+
+  "pip_requirements": {
+    "enabled": true
+  },
+
+  "poetry": {
+    "enabled": true
+  },
+
+  "vulnerabilityAlerts": {
+    "enabled": true,
+    "labels": [
+      "security"
+    ]
+  }
+}

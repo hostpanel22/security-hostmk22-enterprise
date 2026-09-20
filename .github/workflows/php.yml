@@ -1,0 +1,102 @@
+name: PHP SDK CI
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+
+  pull_request:
+    branches:
+      - main
+      - develop
+
+jobs:
+  test:
+
+    name: PHP ${{ matrix.php-version }}
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+
+      matrix:
+        php-version:
+          - "8.2"
+          - "8.3"
+
+    steps:
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-version }}
+          coverage: xdebug
+          tools: composer:v2
+
+      - name: Validate composer.json
+        run: composer validate --strict
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-interaction --no-progress
+
+      - name: Check PHP syntax
+        run: |
+          find src tests -name "*.php" -print0 | xargs -0 -n1 php -l
+
+      - name: Run PHPUnit
+        run: vendor/bin/phpunit
+
+      - name: Run PHPUnit with coverage
+        run: vendor/bin/phpunit --coverage-text
+
+      - name: Upload coverage artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: php-coverage-${{ matrix.php-version }}
+          path: coverage/
+          if-no-files-found: ignore
+
+  quality:
+
+    name: Static Analysis
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.3"
+          tools: composer:v2
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-interaction --no-progress
+
+      - name: Run Composer Audit
+        run: composer audit || true
+
+      - name: Run PHPStan
+        run: |
+          if [ -f vendor/bin/phpstan ]; then
+            vendor/bin/phpstan analyse
+          else
+            echo "PHPStan not installed"
+          fi
+
+      - name: Run PHPCS
+        run: |
+          if [ -f vendor/bin/phpcs ]; then
+            vendor/bin/phpcs src tests
+          else
+            echo "PHPCS not installed"
+          fi
