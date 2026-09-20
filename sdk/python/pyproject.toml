@@ -1,0 +1,104 @@
+[build-system]
+requires = [
+    "setuptools>=69.0.0",
+    "wheel"
+]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "hostmk-security"
+version = "1.0.0"
+description = "Official Python SDK for HostMK Security Framework"
+readme = "README.md"
+requires-python = ">=3.12"
+license = { text = "MIT" }
+
+authors = [
+    { name = "HostMK Team" }
+]
+
+keywords = [
+    "hostmk",
+    "security",
+    "audit",
+    "fraud",
+    "permissions",
+    "tenancy",
+    "multi-tenant",
+    "sdk"
+]
+
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Operating System :: OS Independent",
+    "Topic :: Security",
+    "Topic :: Software Development :: Libraries",
+    "Typing :: Typed"
+]
+
+dependencies = [
+    "requests>=2.32.0"
+]
+
+[project.urls]
+Homepage = "https://github.com/azezaz/HostMK-Security-Framework"
+Documentation = "https://github.com/azezaz/HostMK-Security-Framework/tree/main/sdk/python"
+Repository = "https://github.com/azezaz/HostMK-Security-Framework"
+Issues = "https://github.com/azezaz/HostMK-Security-Framework/issues"
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "coverage>=7.0.0",
+    "mypy>=1.10.0",
+    "ruff>=0.6.0"
+]
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+include = ["hostmk_security*"]
+
+[tool.pytest.ini_options]
+testpaths = [
+    "tests"
+]
+
+python_files = [
+    "test_*.py"
+]
+
+addopts = "-v"
+
+[tool.coverage.run]
+source = [
+    "hostmk_security"
+]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = false
+
+[tool.mypy]
+python_version = "3.12"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = false
+
+[tool.ruff]
+line-length = 88
+target-version = "py312"
+
+[tool.ruff.lint]
+select = [
+    "E",
+    "F",
+    "I"
+]
