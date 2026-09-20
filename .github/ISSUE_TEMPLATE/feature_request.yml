@@ -1,0 +1,138 @@
+name: Feature Request
+description: Suggest a new feature or enhancement for HostMK Security Framework
+title: "[Feature]: "
+labels:
+  - enhancement
+  - feature-request
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for helping improve HostMK Security Framework.
+
+        Please provide as much detail as possible so we can properly evaluate your request.
+
+  - type: input
+    id: feature-name
+    attributes:
+      label: Feature Name
+      description: Short name for the requested feature
+      placeholder: Real-time Fraud Scoring
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem Statement
+      description: What problem are you trying to solve?
+      placeholder: |
+        Currently there is no way to...
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposed-solution
+    attributes:
+      label: Proposed Solution
+      description: Describe the feature you would like to see
+      placeholder: |
+        Add a new endpoint/service that...
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives Considered
+      description: Describe any alternative solutions you have considered
+      placeholder: |
+        Alternative approaches include...
+
+  - type: dropdown
+    id: component
+    attributes:
+      label: Affected Component
+      description: Select the area affected by this feature
+      options:
+        - PHP SDK
+        - Node.js SDK
+        - Python SDK
+        - Go SDK
+        - Authentication
+        - Audit Logs
+        - Fraud Detection
+        - Permissions
+        - Tenancy
+        - API Gateway
+        - Documentation
+        - CI/CD
+        - Security Framework Core
+        - Other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      description: How important is this feature?
+      options:
+        - Low
+        - Medium
+        - High
+        - Critical
+    validations:
+      required: true
+
+  - type: textarea
+    id: api-design
+    attributes:
+      label: API Design Proposal
+      description: If applicable, describe expected API endpoints, methods, payloads, or SDK methods
+      placeholder: |
+        POST /fraud/check
+
+        {
+          "userId": "123"
+        }
+
+  - type: textarea
+    id: sdk-impact
+    attributes:
+      label: SDK Impact
+      description: Which SDKs would require implementation?
+      placeholder: |
+        PHP
+        Node.js
+        Python
+        Go
+
+  - type: textarea
+    id: business-value
+    attributes:
+      label: Business Value
+      description: Explain how this feature benefits users
+      placeholder: |
+        This feature improves...
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Checklist
+      options:
+        - label: I searched existing issues before creating this request.
+          required: true
+        - label: This feature aligns with the goals of HostMK Security Framework.
+          required: true
+        - label: I provided enough information for evaluation.
+          required: true
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional Context
+      description: Screenshots, mockups, references, links, examples, etc.
+      placeholder: |
+        Add any supporting information here.
