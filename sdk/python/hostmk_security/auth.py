@@ -136,3 +136,4 @@ class AuthService:
         return self._client.get(
             "/auth/health"
         )
+        
