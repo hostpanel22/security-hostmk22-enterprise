@@ -2,9 +2,10 @@
 # HostMK Security Framework
 #################################################
 
-#
+#################################################
 # Go
-#
+#################################################
+
 bin/
 *.exe
 *.exe~
@@ -13,99 +14,208 @@ bin/
 *.dylib
 coverage.out
 
-#
+#################################################
+# Python
+#################################################
+
+__pycache__/
+*.py[cod]
+*$py.class
+
+.Python
+.python-version
+
+venv/
+.venv/
+env/
+ENV/
+
+pip-wheel-metadata/
+
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+.coverage
+.coverage.*
+htmlcov/
+
+*.egg-info/
+.eggs/
+
+sdk/python/.pytest_cache/
+sdk/python/.coverage
+sdk/python/htmlcov/
+
+#################################################
 # Node.js
-#
+#################################################
+
 node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
-#
+sdk/node/node_modules/
+
+#################################################
+# PHP
+#################################################
+
+vendor/
+
+composer.phar
+
+.phpunit.result.cache
+
+sdk/php/vendor/
+sdk/php/.phpunit.result.cache
+
+#################################################
 # Build Outputs
-#
+#################################################
+
 dist/
 build/
 coverage/
+release/
 
-#
-# SDK Node
-#
-sdk/node/node_modules/
 sdk/node/dist/
 sdk/node/coverage/
 
-#
+#################################################
 # TypeScript
-#
+#################################################
+
 *.tsbuildinfo
 
-#
+#################################################
+# Test Reports
+#################################################
+
+.nyc_output/
+vitest-report/
+
+junit.xml
+coverage.xml
+clover.xml
+
+#################################################
 # Environment Variables
-#
+#################################################
+
 .env
 .env.*
 !.env.example
 
-#
+#################################################
 # IDE
-#
+#################################################
+
 .vscode/
 .idea/
 
-#
-# OS Files
-#
+*.iml
+
+#################################################
+# Operating System
+#################################################
+
 .DS_Store
 Thumbs.db
 desktop.ini
 
-#
+#################################################
 # Logs
-#
+#################################################
+
 logs/
 *.log
 
-#
-# Temporary Files
-#
+#################################################
+# Cache / Temp
+#################################################
+
 tmp/
 temp/
 .cache/
 
-#
-# Testing
-#
-.nyc_output/
-vitest-report/
-
-#
+#################################################
 # Package Managers
-#
+#################################################
+
 .pnpm-store/
 .npm/
 
-#
+#################################################
+# GitHub Actions Artifacts
+#################################################
+
+artifacts/
+
+#################################################
+# Security
+#################################################
+
+secrets/
+credentials/
+
+*.pem
+*.key
+*.crt
+*.csr
+*.p12
+*.pfx
+
+#################################################
+# Local SDK Config
+#################################################
+
+sdk/node/examples/.env
+sdk/node/examples/.env.local
+
+sdk/python/.env
+sdk/python/.env.local
+
+sdk/php/.env
+sdk/php/.env.local
+
+#################################################
+# Coverage Reports
+#################################################
+
+coverage-report/
+reports/
+
+#################################################
 # Misc
-#
+#################################################
+
 *.bak
 *.swp
 *.swo
 *~
 
-#
-# Security
-#
-secrets/
-credentials/
-*.pem
-*.key
-*.crt
-*.p12
+#################################################
+# Archives
+#################################################
 
-#
-# SDK Examples Local Config
-#
-sdk/node/examples/.env
-sdk/node/examples/.env.local
+*.zip
+*.tar
+*.tar.gz
+*.rar
+
+#################################################
+# Generated Documentation
+#################################################
+
+site/
+docs/_build/
+
+#################################################
+# HostMK Internal
+#################################################
+
+.local/
+.private/
