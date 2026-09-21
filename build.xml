@@ -1,0 +1,350 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project
+    name="HostMK-Security-Framework"
+    default="verify"
+    basedir="."
+>
+
+    <description>
+        HostMK Security Framework Build System
+    </description>
+
+    <!-- ===================================================== -->
+    <!-- Properties                                             -->
+    <!-- ===================================================== -->
+
+    <property name="root.dir" value="."/>
+
+    <property name="php.dir" value="sdk/php"/>
+    <property name="python.dir" value="sdk/python"/>
+    <property name="node.dir" value="sdk/node"/>
+
+    <!-- ===================================================== -->
+    <!-- Clean                                                  -->
+    <!-- ===================================================== -->
+
+    <target name="clean">
+
+        <echo message="Cleaning build artifacts..."/>
+
+        <delete dir="coverage" quiet="true"/>
+
+        <delete dir="build" quiet="true"/>
+
+        <delete dir="dist" quiet="true"/>
+
+        <delete includeemptydirs="true">
+            <fileset dir=".">
+                <include name="**/__pycache__/**"/>
+            </fileset>
+        </delete>
+
+        <delete>
+            <fileset dir=".">
+                <include name="**/*.pyc"/>
+                <include name="**/*.pyo"/>
+            </fileset>
+        </delete>
+
+    </target>
+
+    <!-- ===================================================== -->
+    <!-- PHP                                                    -->
+    <!-- ===================================================== -->
+
+    <target name="php-test">
+
+        <echo message="Running PHP unit tests..."/>
+
+        <exec
+            executable="vendor/bin/phpunit"
+            dir="${php.dir}"
+            failonerror="true"
+        />
+
+    </target>
+
+    <target name="php-coverage">
+
+        <echo message="Running PHP coverage..."/>
+
+        <exec
+            executable="vendor/bin/phpunit"
+            dir="${php.dir}"
+            failonerror="true"
+        >
+            <arg value="--coverage-text"/>
+        </exec>
+
+    </target>
+
+    <target name="php-analyse">
+
+        <echo message="Running PHPStan..."/>
+
+        <exec
+            executable="vendor/bin/phpstan"
+            dir="${php.dir}"
+            failonerror="true"
+        >
+            <arg value="analyse"/>
+            <arg value="src"/>
+            <arg value="tests"/>
+        </exec>
+
+    </target>
+
+    <target
+        name="php"
+        depends="php-test,php-analyse"
+    />
+
+    <!-- ===================================================== -->
+    <!-- Python                                                 -->
+    <!-- ===================================================== -->
+
+    <target name="python-compile">
+
+        <echo message="Compiling Python SDK..."/>
+
+        <exec
+            executable="py"
+            dir="${python.dir}"
+            failonerror="true"
+        >
+            <arg value="-3.12"/>
+            <arg value="-m"/>
+            <arg value="py_compile"/>
+            <arg value="hostmk_security/client.py"/>
+        </exec>
+
+        <exec
+            executable="py"
+            dir="${python.dir}"
+            failonerror="true"
+        >
+            <arg value="-3.12"/>
+            <arg value="-m"/>
+            <arg value="py_compile"/>
+            <arg value="hostmk_security/auth.py"/>
+        </exec>
+
+        <exec
+            executable="py"
+            dir="${python.dir}"
+            failonerror="true"
+        >
+            <arg value="-3.12"/>
+            <arg value="-m"/>
+            <arg value="py_compile"/>
+            <arg value="hostmk_security/audit.py"/>
+        </exec>
+
+        <exec
+            executable="py"
+            dir="${python.dir}"
+            failonerror="true"
+        >
+            <arg value="-3.12"/>
+            <arg value="-m"/>
+            <arg value="py_compile"/>
+            <arg value="hostmk_security/fraud.py"/>
+        </exec>
+
+        <exec
+            executable="py"
+            dir="${python.dir}"
+            failonerror="true"
+        >
+            <arg value="-3.12"/>
+            <arg value="-m"/>
+            <arg value="py_compile"/>
+            <arg value="hostmk_security/permissions.py"/>
+        </exec>
+
+        <exec
+            executable="py"
+            dir="${python.dir}"
+            failonerror="true"
+        >
+            <arg value="-3.12"/>
+            <arg value="-m"/>
+            <arg value="py_compile"/>
+            <arg value="hostmk_security/tenancy.py"/>
+        </exec>
+
+        <exec
+            executable="py"
+            dir="${python.dir}"
+            failonerror="true"
+        >
+            <arg value="-3.12"/>
+            <arg value="-m"/>
+            <arg value="py_compile"/>
+            <arg value="hostmk_security/__init__.py"/>
+        </exec>
+
+    </target>
+
+    <target name="python-test">
+
+        <echo message="Running Python tests..."/>
+
+        <exec
+            executable="py"
+            dir="${python.dir}"
+            failonerror="true"
+        >
+            <arg value="-3.12"/>
+            <arg value="-m"/>
+            <arg value="unittest"/>
+            <arg value="discover"/>
+            <arg value="-s"/>
+            <arg value="tests"/>
+            <arg value="-p"/>
+            <arg value="test_*.py"/>
+            <arg value="-v"/>
+        </exec>
+
+    </target>
+
+    <target
+        name="python"
+        depends="python-compile,python-test"
+    />
+
+    <!-- ===================================================== -->
+    <!-- Node.js                                                -->
+    <!-- ===================================================== -->
+
+    <target name="node-install">
+
+        <echo message="Installing Node dependencies..."/>
+
+        <exec
+            executable="npm"
+            dir="${node.dir}"
+            failonerror="true"
+        >
+            <arg value="install"/>
+        </exec>
+
+    </target>
+
+    <target name="node-test">
+
+        <echo message="Running Node tests..."/>
+
+        <exec
+            executable="npm"
+            dir="${node.dir}"
+            failonerror="true"
+        >
+            <arg value="test"/>
+        </exec>
+
+    </target>
+
+    <target
+        name="node"
+        depends="node-install,node-test"
+    />
+
+    <!-- ===================================================== -->
+    <!-- Documentation                                          -->
+    <!-- ===================================================== -->
+
+    <target name="docs">
+
+        <echo message="Validating documentation structure..."/>
+
+        <available
+            file="docs/API.md"
+            property="api.exists"
+        />
+
+        <available
+            file="docs/Deployment.md"
+            property="deployment.exists"
+        />
+
+        <available
+            file="docs/SDK-PHP.md"
+            property="sdk.php.exists"
+        />
+
+        <available
+            file="docs/SDK-Python.md"
+            property="sdk.python.exists"
+        />
+
+        <available
+            file="docs/SDK-Node.md"
+            property="sdk.node.exists"
+        />
+
+        <available
+            file="docs/SDK-Go.md"
+            property="sdk.go.exists"
+        />
+
+        <fail unless="api.exists">
+            docs/API.md is missing
+        </fail>
+
+        <fail unless="deployment.exists">
+            docs/Deployment.md is missing
+        </fail>
+
+        <fail unless="sdk.php.exists">
+            docs/SDK-PHP.md is missing
+        </fail>
+
+        <fail unless="sdk.python.exists">
+            docs/SDK-Python.md is missing
+        </fail>
+
+        <fail unless="sdk.node.exists">
+            docs/SDK-Node.md is missing
+        </fail>
+
+        <fail unless="sdk.go.exists">
+            docs/SDK-Go.md is missing
+        </fail>
+
+    </target>
+
+    <!-- ===================================================== -->
+    <!-- Verify                                                 -->
+    <!-- ===================================================== -->
+
+    <target
+        name="verify"
+        depends="docs,php,python"
+    >
+        <echo message="All verification checks passed."/>
+    </target>
+
+    <!-- ===================================================== -->
+    <!-- Build                                                  -->
+    <!-- ===================================================== -->
+
+    <target
+        name="build"
+        depends="verify"
+    >
+        <echo message="HostMK Security Framework build successful."/>
+    </target>
+
+    <!-- ===================================================== -->
+    <!-- Release                                                -->
+    <!-- ===================================================== -->
+
+    <target
+        name="release"
+        depends="clean,build"
+    >
+        <echo message="HostMK Security Framework release ready."/>
+    </target>
+
+</project>
