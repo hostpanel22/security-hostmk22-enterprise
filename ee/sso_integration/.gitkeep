@@ -1,0 +1,3 @@
+# Reserved for internal enterprise modules.
+# This directory is intentionally kept in Git.
+# Do not commit proprietary code to the open-source repository.

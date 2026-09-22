@@ -1,0 +1,4 @@
+# HostMK Security Framework
+# Internal packages reserved for enterprise extensions.
+# This directory is intentionally tracked by Git.
+# Open-source contributors should not place proprietary code here.
