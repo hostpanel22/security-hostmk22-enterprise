@@ -7,76 +7,68 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
-	"time"
 
 	"github.com/joho/godotenv"
 
 	"github.com/azezaz/HostMK-Security-Framework/internal/api"
+	"github.com/azezaz/HostMK-Security-Framework/internal/api/handlers"
+	"github.com/azezaz/HostMK-Security-Framework/internal/auth"
 	"github.com/azezaz/HostMK-Security-Framework/internal/config"
+	"github.com/azezaz/HostMK-Security-Framework/internal/crypto"
 	"github.com/azezaz/HostMK-Security-Framework/internal/database"
+	"github.com/azezaz/HostMK-Security-Framework/internal/observability"
+	"github.com/azezaz/HostMK-Security-Framework/internal/persistence"
 )
 
 func main() {
-
 	if err := godotenv.Load(); err != nil {
 		log.Println(".env file not found, using environment variables")
 	}
 
 	cfg := config.Load()
-
 	if err := cfg.Validate(); err != nil {
 		log.Fatalf("configuration error: %v", err)
 	}
 
-	log.Printf(
-		"Starting %s v%s (%s)",
-		cfg.App.Name,
-		cfg.App.Version,
-		cfg.App.Environment,
-	)
+	logger := observability.NewLogger(cfg.App.Environment)
+	ctx := context.Background()
+	shutdownTracer, err := observability.InitTracer(ctx, cfg.Telemetry.ServiceName, cfg.Telemetry.OTLPEndpoint)
+	if err != nil {
+		log.Fatalf("telemetry init failed: %v", err)
+	}
+	defer func() { _ = shutdownTracer(context.Background()) }()
 
-	var db *database.Postgres
+	db, err := database.New(database.Config{DatabaseURL: cfg.DB.URL})
+	if err != nil {
+		log.Fatalf("database connection failed: %v", err)
+	}
+	defer func() { _ = db.Close() }()
 
-	if cfg.DB.URL != "" {
-
-		var err error
-
-		db, err = database.New(database.Config{
-			DatabaseURL: cfg.DB.URL,
-		})
-
-		if err != nil {
-			log.Fatalf(
-				"database connection failed: %v",
-				err,
-			)
-		}
-
-		defer func() {
-			if err := db.Close(); err != nil {
-				log.Printf(
-					"database close error: %v",
-					err,
-				)
-			}
-		}()
-
-		log.Println(
-			"PostgreSQL connection established",
-		)
-
-	} else {
-
-		log.Println(
-			"DATABASE_URL not configured, running without database",
-		)
+	if err := db.Migrate(ctx); err != nil {
+		log.Fatalf("database migration failed: %v", err)
 	}
 
-	router := api.NewRouter()
+	aead, err := crypto.NewAEAD(cfg.Crypto.EncryptionKey)
+	if err != nil {
+		log.Fatalf("encryption init failed: %v", err)
+	}
+
+	appAPI := &handlers.API{
+		Config: cfg,
+		Store:  persistence.New(db.DB()),
+		Tokens: auth.Tokens{
+			Issuer:     cfg.JWT.Issuer,
+			Secret:     []byte(cfg.JWT.Secret),
+			AccessTTL:  cfg.JWT.AccessTTL,
+			RefreshTTL: cfg.JWT.RefreshTTL,
+		},
+		AEAD: aead,
+		Log:  logger,
+	}
 
 	server := &http.Server{
 		Addr:              cfg.Address(),
-		Handler:           router,
+		Handler:           api.NewRouter(appAPI),
 		ReadTimeout:       cfg.App.ReadTimeout,
 		WriteTimeout:      cfg.App.WriteTimeout,
 		IdleTimeout:       cfg.App.IdleTimeout,
@@ -84,63 +76,18 @@ func main() {
 	}
 
 	go func() {
-
-		log.Printf(
-			"%s listening on %s",
-			cfg.App.Name,
-			cfg.Address(),
-		)
-
-		if err := server.ListenAndServe(); err != nil &&
-			err != http.ErrServerClosed {
-
-			log.Fatalf(
-				"server error: %v",
-				err,
-			)
+		logger.Info("server_start", "addr", cfg.Address(), "name", cfg.App.Name, "version", cfg.App.Version)
+		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			log.Fatalf("server error: %v", err)
 		}
 	}()
 
-	waitForShutdown(
-		server,
-		cfg.App.ShutdownTimeout,
-	)
-}
-
-func waitForShutdown(
-	server *http.Server,
-	timeout time.Duration,
-) {
-
 	stop := make(chan os.Signal, 1)
-
-	signal.Notify(
-		stop,
-		os.Interrupt,
-		syscall.SIGTERM,
-	)
-
+	signal.Notify(stop, os.Interrupt, syscall.SIGTERM)
 	<-stop
-
-	log.Println(
-		"shutdown signal received",
-	)
-
-	ctx, cancel := context.WithTimeout(
-		context.Background(),
-		timeout,
-	)
+	shutdownCtx, cancel := context.WithTimeout(context.Background(), cfg.App.ShutdownTimeout)
 	defer cancel()
-
-	if err := server.Shutdown(ctx); err != nil {
-
-		log.Printf(
-			"shutdown error: %v",
-			err,
-		)
+	if err := server.Shutdown(shutdownCtx); err != nil {
+		log.Printf("shutdown error: %v", err)
 	}
-
-	log.Println(
-		"server stopped",
-	)
 }

@@ -6,34 +6,31 @@ import (
 	"time"
 )
 
-type UserRole string
-
-const (
-	UserRoleAdmin UserRole = "admin"
-	UserRoleUser  UserRole = "user"
-	UserRoleGuest UserRole = "guest"
-)
-
+// UserStatus is a technical lifecycle state of an account, not a business role.
 type UserStatus string
 
 const (
-	UserStatusActive   UserStatus = "active"
-	UserStatusInactive UserStatus = "inactive"
-	UserStatusPending  UserStatus = "pending"
-	UserStatusBlocked  UserStatus = "blocked"
+	UserStatusActive    UserStatus = "active"
+	UserStatusInactive  UserStatus = "inactive"
+	UserStatusPending   UserStatus = "pending"
+	UserStatusSuspended UserStatus = "suspended"
+	UserStatusBlocked   UserStatus = "blocked"
 )
 
 type User struct {
-	ID        string     `json:"id" db:"id"`
-	TenantID  string     `json:"tenant_id" db:"tenant_id"`
-	Email     string     `json:"email" db:"email"`
-	Password  string     `json:"password,omitempty" db:"password"`
-	Name      string     `json:"name" db:"name"`
-	Role      UserRole   `json:"role" db:"role"`
-	Status    UserStatus `json:"status" db:"status"`
-	CreatedAt time.Time  `json:"created_at" db:"created_at"`
-	UpdatedAt time.Time  `json:"updated_at" db:"updated_at"`
-	LastLogin *time.Time `json:"last_login,omitempty" db:"last_login"`
+	ID               string     `json:"id" db:"id"`
+	TenantID         string     `json:"tenant_id" db:"tenant_id"`
+	Email            string     `json:"email" db:"email"`
+	PasswordHash     string     `json:"-" db:"password_hash"`
+	Name             string     `json:"name" db:"name"`
+	Status           UserStatus `json:"status" db:"status"`
+	EmailVerifiedAt  *time.Time `json:"email_verified_at,omitempty" db:"email_verified_at"`
+	MFAEnabled       bool       `json:"mfa_enabled" db:"mfa_enabled"`
+	MFASecretEnc     []byte     `json:"-" db:"mfa_secret_enc"`
+	RoleIDs          []string   `json:"role_ids,omitempty"`
+	CreatedAt        time.Time  `json:"created_at" db:"created_at"`
+	UpdatedAt        time.Time  `json:"updated_at" db:"updated_at"`
+	LastLogin        *time.Time `json:"last_login,omitempty" db:"last_login"`
 }
 
 func (u *User) Normalize() {
@@ -43,9 +40,6 @@ func (u *User) Normalize() {
 	u.Email = strings.TrimSpace(strings.ToLower(u.Email))
 	u.Name = strings.TrimSpace(u.Name)
 	u.TenantID = strings.TrimSpace(u.TenantID)
-	if u.Role == "" {
-		u.Role = UserRoleUser
-	}
 	if u.Status == "" {
 		u.Status = UserStatusPending
 	}
@@ -76,13 +70,8 @@ func (u *User) Validate() error {
 	if strings.TrimSpace(u.Name) == "" {
 		return fmt.Errorf("%w: user name is required", ErrValidation)
 	}
-	switch u.Role {
-	case UserRoleAdmin, UserRoleUser, UserRoleGuest:
-	default:
-		return fmt.Errorf("%w: unsupported user role %q", ErrValidation, u.Role)
-	}
 	switch u.Status {
-	case UserStatusActive, UserStatusInactive, UserStatusPending, UserStatusBlocked:
+	case UserStatusActive, UserStatusInactive, UserStatusPending, UserStatusSuspended, UserStatusBlocked:
 	default:
 		return fmt.Errorf("%w: unsupported user status %q", ErrValidation, u.Status)
 	}
@@ -93,8 +82,16 @@ func (u *User) IsActive() bool {
 	return u != nil && u.Status == UserStatusActive
 }
 
+func (u *User) CanAuthenticate() bool {
+	return u != nil && u.Status == UserStatusActive
+}
+
 func (u *User) IsBlocked() bool {
-	return u != nil && u.Status == UserStatusBlocked
+	return u != nil && (u.Status == UserStatusBlocked || u.Status == UserStatusSuspended)
+}
+
+func (u *User) EmailVerified() bool {
+	return u != nil && u.EmailVerifiedAt != nil
 }
 
 func (u *User) Clone() User {
@@ -102,9 +99,17 @@ func (u *User) Clone() User {
 		return User{}
 	}
 	clone := *u
+	clone.RoleIDs = append([]string{}, u.RoleIDs...)
 	if u.LastLogin != nil {
 		copyLastLogin := *u.LastLogin
 		clone.LastLogin = &copyLastLogin
+	}
+	if u.EmailVerifiedAt != nil {
+		copyVerified := *u.EmailVerifiedAt
+		clone.EmailVerifiedAt = &copyVerified
+	}
+	if u.MFASecretEnc != nil {
+		clone.MFASecretEnc = append([]byte{}, u.MFASecretEnc...)
 	}
 	return clone
 }

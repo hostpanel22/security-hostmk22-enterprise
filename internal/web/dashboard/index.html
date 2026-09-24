@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>HostMK Admin</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div id="auth-screen" class="auth">
+    <div class="card">
+      <h1>HostMK Security</h1>
+      <p class="muted">Administration SaaS multi-tenant — le métier vit dans PostgreSQL.</p>
+      <form id="login-form">
+        <label>Tenant slug<input name="tenant_slug" required /></label>
+        <label>Email<input name="email" type="email" required /></label>
+        <label>Mot de passe<input name="password" type="password" required /></label>
+        <label>Code MFA (si activé)<input name="mfa_code" /></label>
+        <button type="submit">Connexion</button>
+      </form>
+      <details>
+        <summary>Premier démarrage (bootstrap)</summary>
+        <form id="bootstrap-form">
+          <label>Nom du tenant<input name="tenant_name" required /></label>
+          <label>Slug<input name="tenant_slug" required /></label>
+          <label>Votre nom<input name="name" required /></label>
+          <label>Email<input name="email" type="email" required /></label>
+          <label>Mot de passe<input name="password" type="password" required /></label>
+          <button type="submit">Créer la plateforme</button>
+        </form>
+      </details>
+      <p id="auth-error" class="error"></p>
+    </div>
+  </div>
+
+  <div id="app" class="app hidden">
+    <aside>
+      <h2>HostMK</h2>
+      <nav>
+        <button data-view="users">Utilisateurs</button>
+        <button data-view="tenants">Tenants</button>
+        <button data-view="roles">Rôles</button>
+        <button data-view="permissions">Permissions</button>
+        <button data-view="keys">API Keys</button>
+        <button data-view="secrets">Secrets</button>
+        <button data-view="audit">Audit</button>
+        <button data-view="fraud">Fraude</button>
+        <button data-view="settings">Paramètres</button>
+      </nav>
+      <button id="logout">Déconnexion</button>
+    </aside>
+    <main>
+      <header>
+        <h1 id="view-title">Utilisateurs</h1>
+        <p class="muted">Créez rôles, permissions, règles et quotas ici. Aucun redéploiement.</p>
+      </header>
+      <section id="view"></section>
+    </main>
+  </div>
+  <script src="./app.js"></script>
+</body>
+</html>

@@ -7,30 +7,8 @@ import (
 	"time"
 )
 
-func setRateLimitConfig(limit int, window time.Duration) func() {
-	previousLimit := rateLimiter.limit
-	previousWindow := rateLimiter.window
-	previousClients := rateLimiter.clients
-
-	rateLimiter.mu.Lock()
-	rateLimiter.limit = limit
-	rateLimiter.window = window
-	rateLimiter.clients = make(map[string][]time.Time)
-	rateLimiter.mu.Unlock()
-
-	return func() {
-		rateLimiter.mu.Lock()
-		rateLimiter.limit = previousLimit
-		rateLimiter.window = previousWindow
-		rateLimiter.clients = previousClients
-		rateLimiter.mu.Unlock()
-	}
-}
-
 func TestRateLimitRemoteAddr(t *testing.T) {
-	defer setRateLimitConfig(3, time.Minute)()
-
-	handler := RateLimit(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	handler := RateLimit(StaticRateLimitProvider{Limit: 3, Window: time.Minute})(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 	}))
 
@@ -38,9 +16,7 @@ func TestRateLimitRemoteAddr(t *testing.T) {
 		req := httptest.NewRequest(http.MethodGet, "http://example.com/test", nil)
 		req.RemoteAddr = "127.0.0.1:1234"
 		res := httptest.NewRecorder()
-
 		handler.ServeHTTP(res, req)
-
 		if res.Code != http.StatusOK {
 			t.Fatalf("request %d returned status %d, want %d", i+1, res.Code, http.StatusOK)
 		}
@@ -48,9 +24,7 @@ func TestRateLimitRemoteAddr(t *testing.T) {
 }
 
 func TestRateLimitXForwardedFor(t *testing.T) {
-	defer setRateLimitConfig(2, time.Minute)()
-
-	handler := RateLimit(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	handler := RateLimit(StaticRateLimitProvider{Limit: 2, Window: time.Minute})(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 	}))
 
@@ -59,7 +33,6 @@ func TestRateLimitXForwardedFor(t *testing.T) {
 		req.RemoteAddr = "10.0.0.1:1111"
 		req.Header.Set("X-Forwarded-For", "203.0.113.15, 198.51.100.4")
 		res := httptest.NewRecorder()
-
 		handler.ServeHTTP(res, req)
 		if res.Code != http.StatusOK {
 			t.Fatalf("request %d returned status %d, want %d", i+1, res.Code, http.StatusOK)
@@ -70,7 +43,6 @@ func TestRateLimitXForwardedFor(t *testing.T) {
 	req.RemoteAddr = "10.0.0.1:1111"
 	req.Header.Set("X-Forwarded-For", "203.0.113.15, 198.51.100.4")
 	res := httptest.NewRecorder()
-
 	handler.ServeHTTP(res, req)
 	if res.Code != http.StatusTooManyRequests {
 		t.Fatalf("third request returned status %d, want %d", res.Code, http.StatusTooManyRequests)
@@ -78,9 +50,7 @@ func TestRateLimitXForwardedFor(t *testing.T) {
 }
 
 func TestRateLimitXRealIP(t *testing.T) {
-	defer setRateLimitConfig(1, time.Minute)()
-
-	handler := RateLimit(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	handler := RateLimit(StaticRateLimitProvider{Limit: 1, Window: time.Minute})(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 	}))
 
@@ -104,9 +74,7 @@ func TestRateLimitXRealIP(t *testing.T) {
 }
 
 func TestRateLimitRejectsRequestsOverLimit(t *testing.T) {
-	defer setRateLimitConfig(2, time.Minute)()
-
-	handler := RateLimit(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	handler := RateLimit(StaticRateLimitProvider{Limit: 2, Window: time.Minute})(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 	}))
 
@@ -114,9 +82,7 @@ func TestRateLimitRejectsRequestsOverLimit(t *testing.T) {
 		req := httptest.NewRequest(http.MethodGet, "http://example.com/test", nil)
 		req.RemoteAddr = "127.0.0.1:5678"
 		res := httptest.NewRecorder()
-
 		handler.ServeHTTP(res, req)
-
 		if res.Code != http.StatusOK {
 			t.Fatalf("request %d returned status %d, want %d", i+1, res.Code, http.StatusOK)
 		}
@@ -125,31 +91,20 @@ func TestRateLimitRejectsRequestsOverLimit(t *testing.T) {
 	req := httptest.NewRequest(http.MethodGet, "http://example.com/test", nil)
 	req.RemoteAddr = "127.0.0.1:5678"
 	res := httptest.NewRecorder()
-
 	handler.ServeHTTP(res, req)
-
 	if res.Code != http.StatusTooManyRequests {
 		t.Fatalf("third request returned status %d, want %d", res.Code, http.StatusTooManyRequests)
 	}
-
 	if res.Header().Get("Retry-After") == "" {
 		t.Fatal("expected Retry-After header on rate-limited response")
 	}
 }
 
 func TestRateLimitCleansExpiredEntries(t *testing.T) {
-	defer setRateLimitConfig(2, 50*time.Millisecond)()
-
-	rateLimiter.mu.Lock()
-	rateLimiter.clients["expired-client"] = []time.Time{time.Now().Add(-time.Second)}
-	rateLimiter.mu.Unlock()
-
-	rateLimiter.cleanExpired(time.Now())
-
-	rateLimiter.mu.Lock()
-	_, exists := rateLimiter.clients["expired-client"]
-	rateLimiter.mu.Unlock()
-	if exists {
+	limiter := newClientLimiter()
+	limiter.clients["expired-client"] = []time.Time{time.Now().Add(-time.Second)}
+	limiter.cleanExpired(time.Now(), 50*time.Millisecond)
+	if _, exists := limiter.clients["expired-client"]; exists {
 		t.Fatal("expired client entry should be removed from the map")
 	}
 }

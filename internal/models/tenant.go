@@ -7,6 +7,7 @@ import (
 	"time"
 )
 
+// TenantStatus is a technical lifecycle of a tenant workspace.
 type TenantStatus string
 
 const (
@@ -18,15 +19,6 @@ const (
 	TenantStatusDeleted   TenantStatus = "deleted"
 )
 
-type TenantPlan string
-
-const (
-	TenantPlanStarter    TenantPlan = "starter"
-	TenantPlanPro        TenantPlan = "pro"
-	TenantPlanEnterprise TenantPlan = "enterprise"
-	TenantPlanCustom     TenantPlan = "custom"
-)
-
 type Tenant struct {
 	ID          string         `json:"id" db:"id"`
 	Name        string         `json:"name" db:"name"`
@@ -34,9 +26,11 @@ type Tenant struct {
 	Domain      string         `json:"domain,omitempty" db:"domain"`
 	Status      TenantStatus   `json:"status" db:"status"`
 	OwnerID     string         `json:"owner_id,omitempty" db:"owner_id"`
-	Plan        TenantPlan     `json:"plan" db:"plan"`
+	Plan        string         `json:"plan" db:"plan"`
 	Timezone    string         `json:"timezone,omitempty" db:"timezone"`
 	Country     string         `json:"country,omitempty" db:"country"`
+	Quotas      map[string]any `json:"quotas,omitempty" db:"quotas"`
+	Branding    map[string]any `json:"branding,omitempty" db:"branding"`
 	Metadata    map[string]any `json:"metadata,omitempty" db:"metadata"`
 	CreatedAt   time.Time      `json:"created_at" db:"created_at"`
 	UpdatedAt   time.Time      `json:"updated_at" db:"updated_at"`
@@ -56,12 +50,19 @@ func (t *Tenant) Normalize() {
 	t.Domain = strings.TrimSpace(strings.ToLower(t.Domain))
 	t.Timezone = strings.TrimSpace(t.Timezone)
 	t.Country = strings.TrimSpace(strings.ToUpper(t.Country))
+	t.Plan = strings.TrimSpace(t.Plan)
 
 	if t.Status == "" {
 		t.Status = TenantStatusPending
 	}
-	if t.Plan == "" {
-		t.Plan = TenantPlanStarter
+	if t.Quotas == nil {
+		t.Quotas = map[string]any{}
+	}
+	if t.Branding == nil {
+		t.Branding = map[string]any{}
+	}
+	if t.Metadata == nil {
+		t.Metadata = map[string]any{}
 	}
 }
 
@@ -111,6 +112,10 @@ func (t *Tenant) CanAccessPlatform() bool {
 		return false
 	}
 	return t.IsActive() || t.IsPending()
+}
+
+func (t *Tenant) IsOwner(userID string) bool {
+	return t != nil && strings.TrimSpace(t.OwnerID) != "" && t.OwnerID == strings.TrimSpace(userID)
 }
 
 func (t *Tenant) Activate() {
@@ -174,14 +179,6 @@ func (t *Tenant) Validate() error {
 		return fmt.Errorf("%w: tenant slug must be lowercase and may only contain letters, numbers, and hyphens", ErrValidation)
 	}
 
-	if t.Plan != "" {
-		switch t.Plan {
-		case TenantPlanStarter, TenantPlanPro, TenantPlanEnterprise, TenantPlanCustom:
-		default:
-			return fmt.Errorf("%w: unsupported tenant plan %q", ErrValidation, t.Plan)
-		}
-	}
-
 	if t.Status != "" {
 		switch t.Status {
 		case TenantStatusPending, TenantStatusActive, TenantStatusSuspended, TenantStatusExpired, TenantStatusDisabled, TenantStatusDeleted:
@@ -203,12 +200,9 @@ func (t *Tenant) Clone() Tenant {
 	}
 
 	clone := *t
-	if t.Metadata != nil {
-		clone.Metadata = make(map[string]any, len(t.Metadata))
-		for k, v := range t.Metadata {
-			clone.Metadata[k] = v
-		}
-	}
+	clone.Quotas = cloneMap(t.Quotas)
+	clone.Branding = cloneMap(t.Branding)
+	clone.Metadata = cloneMap(t.Metadata)
 	if t.SuspendedAt != nil {
 		suspendedAt := *t.SuspendedAt
 		clone.SuspendedAt = &suspendedAt
@@ -218,4 +212,15 @@ func (t *Tenant) Clone() Tenant {
 		clone.ExpiresAt = &expiresAt
 	}
 	return clone
+}
+
+func cloneMap(src map[string]any) map[string]any {
+	if src == nil {
+		return map[string]any{}
+	}
+	out := make(map[string]any, len(src))
+	for k, v := range src {
+		out[k] = v
+	}
+	return out
 }

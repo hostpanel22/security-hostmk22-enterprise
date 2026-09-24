@@ -6,27 +6,25 @@ import (
 	"time"
 )
 
-type SecretType string
-
-const (
-	SecretTypeAPIKey     SecretType = "api_key"
-	SecretTypeJWT        SecretType = "jwt"
-	SecretTypeDatabase   SecretType = "database"
-	SecretTypeEncryption SecretType = "encryption"
-	SecretTypeWebhook    SecretType = "webhook"
-	SecretTypeCustom     SecretType = "custom"
-)
-
 type Secret struct {
 	ID          string     `json:"id" db:"id"`
 	TenantID    string     `json:"tenant_id" db:"tenant_id"`
 	Name        string     `json:"name" db:"name"`
-	Type        SecretType `json:"type" db:"type"`
-	Value       string     `json:"value,omitempty" db:"value"`
+	Type        string     `json:"type" db:"type"`
+	Value       string     `json:"value,omitempty"`
 	MaskedValue string     `json:"masked_value,omitempty" db:"masked_value"`
 	Description string     `json:"description,omitempty" db:"description"`
+	RevokedAt   *time.Time `json:"revoked_at,omitempty" db:"revoked_at"`
 	CreatedAt   time.Time  `json:"created_at" db:"created_at"`
 	UpdatedAt   time.Time  `json:"updated_at" db:"updated_at"`
+}
+
+type SecretVersion struct {
+	ID          string    `json:"id"`
+	SecretID    string    `json:"secret_id"`
+	MaskedValue string    `json:"masked_value"`
+	CreatedAt   time.Time `json:"created_at"`
+	CreatedBy   string    `json:"created_by,omitempty"`
 }
 
 func (s *Secret) Normalize() {
@@ -36,8 +34,9 @@ func (s *Secret) Normalize() {
 	s.TenantID = strings.TrimSpace(s.TenantID)
 	s.Name = strings.TrimSpace(strings.ToUpper(s.Name))
 	s.Description = strings.TrimSpace(s.Description)
+	s.Type = strings.TrimSpace(strings.ToLower(s.Type))
 	if s.Type == "" {
-		s.Type = SecretTypeCustom
+		s.Type = "custom"
 	}
 	if s.Value != "" {
 		s.MaskedValue = MaskSecret(s.Value)
@@ -63,13 +62,8 @@ func (s *Secret) Validate() error {
 	if strings.TrimSpace(s.Name) == "" {
 		return fmt.Errorf("%w: secret name is required", ErrValidation)
 	}
-	if strings.TrimSpace(s.Value) == "" {
+	if strings.TrimSpace(s.Value) == "" && s.RevokedAt == nil {
 		return fmt.Errorf("%w: secret value is required", ErrValidation)
-	}
-	switch s.Type {
-	case SecretTypeAPIKey, SecretTypeJWT, SecretTypeDatabase, SecretTypeEncryption, SecretTypeWebhook, SecretTypeCustom:
-	default:
-		return fmt.Errorf("%w: unsupported secret type %q", ErrValidation, s.Type)
 	}
 	return nil
 }
@@ -87,7 +81,7 @@ func (s *Secret) Mask() string {
 		return ""
 	}
 	if s.Value == "" {
-		return ""
+		return s.MaskedValue
 	}
 	return MaskSecret(s.Value)
 }

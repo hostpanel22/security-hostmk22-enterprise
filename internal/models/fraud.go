@@ -137,9 +137,6 @@ func (v *FraudViolation) Validate() error {
 	if strings.TrimSpace(v.TenantID) == "" {
 		return fmt.Errorf("%w: tenant id is required for fraud violation", ErrValidation)
 	}
-	if strings.TrimSpace(v.SignalID) == "" {
-		return fmt.Errorf("%w: fraud signal id is required", ErrValidation)
-	}
 	if strings.TrimSpace(v.RuleID) == "" {
 		return fmt.Errorf("%w: fraud rule id is required", ErrValidation)
 	}
