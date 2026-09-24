@@ -1,374 +1,230 @@
-# 🔐 HostMK Security Framework
+# HostMK Security Framework
 
-Enterprise-Grade Security Framework for SaaS, Multi-Tenant Applications, APIs, Platforms, and Cloud Services.
+![Go](https://img.shields.io/badge/Go-1.26%2B-00ADD8?logo=go)
+![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)
+![Status](https://img.shields.io/badge/Status-Active-success)
 
-HostMK Security Framework is an open-source security toolkit designed to help developers integrate modern security controls into their applications while maintaining a clear separation between community and enterprise features.
+HostMK Security Framework is a modular security toolkit for SaaS platforms, multi-tenant applications, APIs, and enterprise systems. The repository contains core security primitives, authorization building blocks, audit capabilities, fraud controls, and secret-management utilities designed for production use.
 
----
+## Overview
 
-## 🎯 Project Goals
+This project focuses on the security controls most often required by modern platform teams:
 
-HostMK Security Framework aims to provide:
+- multi-tenant isolation and validation
+- role and permission enforcement
+- audit event capture and export
+- fraud detection and violation scoring
+- secret storage and rotation primitives
+- HTTP API protections and middleware
+- JWT-based authentication support
 
-- Multi-Tenant Security
-- Role-Based Access Control (RBAC)
-- Secret Management
-- API Security
-- Fraud Detection
-- Audit Logging
-- Security Middleware
-- Authentication & Authorization
-- Enterprise Security Extensions
+## Architecture
 
-The framework is designed for:
-
-- SaaS Platforms
-- Marketplace Applications
-- Fintech Products
-- Internal Business Platforms
-- Cloud-Native Services
-- White-Label Systems
-- Microservice Architectures
-
----
-
-# 🚀 Current Modules
-
-## ✅ Tenancy
-
-Multi-tenant isolation and validation.
-
-Features:
-
-- Tenant validation
-- Tenant ownership checks
-- Cross-tenant protection
-- Tenant middleware support
-
-Location:
-
-```text
-core/tenancy/
+```mermaid
+flowchart LR
+    A[Applications] --> B[API Layer]
+    B --> C[Auth & JWT]
+    B --> D[Tenancy]
+    B --> E[RBAC / Permissions]
+    B --> F[Audit]
+    B --> G[Fraud]
+    B --> H[Secrets]
+    D --> I[Database / Persistence]
+    E --> I
+    F --> I
+    G --> I
+    H --> I
 ```
 
----
-
-## ✅ Permissions
-
-Permission management system.
-
-Features:
-
-- Permission definitions
-- Permission validation
-- Permission checking
-- Access verification
-
-Location:
-
-```text
-core/permissions/
-```
-
----
-
-## ✅ Audit
-
-Security audit system.
-
-Features:
-
-- Audit events
-- Audit logging
-- Security event tracking
-- Activity monitoring
-
-Location:
-
-```text
-core/audit/
-```
-
----
-
-## ✅ Fraud
-
-Fraud detection primitives.
-
-Features:
-
-- Risk evaluation
-- Fraud indicators
-- Event scoring
-- Security monitoring
-
-Location:
-
-```text
-core/fraud/
-```
-
----
-
-## ✅ Secrets
-
-Enterprise-grade secret management.
-
-Features:
-
-- AES-256 Encryption
-- Secret Vault
-- Secret Rotation
-- Secret Middleware
-- Secret Storage
-- Multi-Tenant Secret Isolation
-
-Location:
-
-```text
-core/secrets/
-```
-
----
-
-# 🏗 Architecture
+## Repository layout
 
 ```text
 HostMK-Security-Framework/
-│
-├── core/
+├── cmd/                     # application entrypoints
+├── core/                    # OSS security modules
 │   ├── audit/
 │   ├── fraud/
 │   ├── permissions/
+│   ├── rbac/
 │   ├── secrets/
 │   └── tenancy/
-│
-├── tests/
-│
-├── docs/
-│   ├── architecture.md
-│   ├── roadmap.md
-│   ├── contributing.md
-│   └── security.md
-│
-├── ee/
-│   ├── LICENSE
-│   ├── README.md
-│   ├── sso_integration/
-│   ├── audit_logs/
-│   ├── compliance/
-│   └── advanced_security/
-│
+├── internal/                # application implementation details
+├── docs/                    # project documentation
+├── ee/                      # enterprise-only components
+├── sdk/                     # language SDKs
+├── tests/                   # Go test suite
+├── .github/                 # governance and CI workflows
 ├── LICENSE
 ├── NOTICE
-└── README.md
+├── SECURITY.md
+├── CONTRIBUTING.md
+├── SUPPORT.md
+├── README.md
+└── go.mod
 ```
 
----
+## Features
 
-# 🔓 Open Source Edition
+| Area | Status | Notes |
+| --- | --- | --- |
+| Multi-tenancy | ✅ Active | Isolation, validation, tenant context, owner checks |
+| Permissions | ✅ Active | Resource checks and policy enforcement |
+| RBAC | ✅ Active | Role, permission, and policy abstractions |
+| Audit | ✅ Active | Event capture, filters, retention, export |
+| Fraud detection | ✅ Active | Signals, scoring, rules, violations |
+| Secret management | ✅ Active | Encryption, storage, rotation, vault patterns |
+| JWT / authentication | ✅ Active | Token generation and validation support |
+| API protections | ✅ Active | Middleware, rate limiting, security headers, health endpoints |
+| Enterprise extensions | ⚠️ Separate license | Located under ee/ |
 
-The Open Source Edition includes all modules located inside:
+## RBAC
 
-```text
-core/
-```
+The RBAC package is implemented in the repository under the core/rbac module. It includes:
 
-Licensed under:
+- roles
+- permissions
+- policies
+- access evaluation
+- middleware integration
+- tenant-aware authorization primitives
 
-```text
-Apache License 2.0
-```
+## Audit
 
-You may:
+The audit module provides structured event logging, filtering, retention, and export helpers for security-relevant activity.
 
-- Use commercially
-- Modify
-- Distribute
-- Fork
-- Build products using the framework
+## Fraud Detection
 
-subject to Apache 2.0 terms.
+The fraud package includes rules, violations, scores, and middleware hooks to monitor suspicious activity and reduce risk exposure.
 
----
+## Secrets Management
 
-# 🔒 Enterprise Edition
+The secrets module focuses on encryption, secret storage, rotation models, and vault-oriented patterns for sensitive data management.
 
-The Enterprise Edition is located in:
+## Multi-tenancy
 
-```text
-ee/
-```
+The tenancy layer enforces boundaries between tenant contexts, preventing unauthorized cross-tenant access and validating ownership and isolation rules.
 
-Enterprise modules are NOT covered by Apache 2.0.
+## Installation
 
-Examples:
+### Requirements
 
-- SSO Integrations
-- Advanced Audit Reporting
-- Compliance Controls
-- Enterprise Monitoring
-- Premium Security Features
+- Go 1.26+
+- Git
+- PostgreSQL-compatible database for runtime usage
 
-Enterprise components require a separate commercial license.
-
-See:
-
-```text
-ee/LICENSE
-```
-
-for details.
-
----
-
-# 🧪 Testing
-
-Run all tests:
+### Clone
 
 ```bash
-go test ./...
+git clone https://github.com/azezaz/HostMK-Security-Framework.git
+cd HostMK-Security-Framework
 ```
 
-Run formatting:
+### Dependency setup
 
 ```bash
-go fmt ./...
+go mod tidy
 ```
 
-Run static analysis:
-
-```bash
-go vet ./...
-```
-
-Build project:
+### Build
 
 ```bash
 go build ./...
 ```
 
----
-
-# 📊 Project Status
-
-| Module | Status |
-|----------|----------|
-| Tenancy | ✅ Stable |
-| Permissions | ✅ Stable |
-| Audit | ✅ Stable |
-| Fraud | ✅ Stable |
-| Secrets | ✅ Stable |
-| RBAC | 🚧 Planned |
-| JWT/Auth | 🚧 Planned |
-| API Keys | 🚧 Planned |
-| Rate Limiting | 🚧 Planned |
-| MFA/TOTP | 🚧 Planned |
-| Session Security | 🚧 Planned |
-| Webhook Security | 🚧 Planned |
-| Security Headers | 🚧 Planned |
-| IP Reputation | 🚧 Planned |
-| Threat Detection Engine | 🚧 Planned |
-
----
-
-# 🛣 Roadmap
-
-### Phase 1
-
-- Tenancy
-- Permissions
-- Audit
-- Fraud
-- Secrets
-
-### Phase 2
-
-- RBAC
-- JWT Authentication
-- API Keys
-- Security Middleware
-
-### Phase 3
-
-- MFA/TOTP
-- Session Security
-- Security Headers
-- Webhook Security
-
-### Phase 4
-
-- Threat Detection Engine
-- IP Reputation
-- Enterprise Security Extensions
-
----
-
-# 🤝 Contributing
-
-Contributions are welcome.
-
-Before submitting changes:
-
-1. Format code
-
-```bash
-go fmt ./...
-```
-
-2. Run tests
+### Test
 
 ```bash
 go test ./...
 ```
 
-3. Run vet
+## Configuration
 
-```bash
-go vet ./...
+The server configuration is loaded from environment variables and a local .env file when present. The default runtime expects values such as:
+
+```env
+APP_NAME=HostMK Security Framework
+APP_ENV=development
+HOST=0.0.0.0
+PORT=8080
+DATABASE_URL=postgres://user:password@localhost:5432/hostmk
+JWT_SECRET=replace-with-secret
+ENCRYPTION_KEY=replace-with-32-byte-key
 ```
 
-4. Ensure all checks pass.
+The runtime configuration for JWT, database access, and encryption keys is validated in the application startup path.
+
+## Database
+
+The project uses a PostgreSQL-oriented persistence layer and includes migration support through the database package. Runtime configuration is provided through DATABASE_URL, and database migration is performed during startup in the server entrypoint.
+
+## API
+
+The application exposes HTTP endpoints under the /api/v1 namespace. Core routes include:
+
+| Endpoint | Purpose |
+| --- | --- |
+| /health | health check |
+| /ready | readiness check |
+| /api/v1/version | version metadata |
+| /api/v1/auth/bootstrap | bootstrap auth state |
+| /api/v1/auth/login | login |
+| /api/v1/auth/refresh | refresh token |
+| /api/v1/users | user resources |
+| /api/v1/tenants | tenant resources |
+| /api/v1/rbac/roles | RBAC roles |
+| /api/v1/permissions | permission management |
+| /api/v1/secrets | secret resources |
+| /api/v1/audit/events | audit events |
+| /api/v1/fraud/rules | fraud rules |
+| /api/v1/settings | settings |
+
+For the full API contract and examples, see [docs/API.md](docs/API.md).
+
+## Roadmap
+
+### Current focus
+
+- stabilization of core security primitives
+- RBAC and permissions documentation alignment
+- security policy and support process maturity
+- SDK and documentation parity
+
+### Planned enhancements
+
+- advanced auth flows
+- expanded rate limiting and webhook controls
+- stronger operational telemetry and security automation
+- broader enterprise feature packaging
+
+## License
+
+The core repository is licensed under the Apache License 2.0, except for files under the enterprise directory ee/, which are governed by the repository’s enterprise license terms.
+
+- [LICENSE](LICENSE)
+- [NOTICE](NOTICE)
+- [ee/LICENSE](ee/LICENSE)
+
+## Security
+
+Please report vulnerabilities privately as described in [SECURITY.md](SECURITY.md). Do not open public issues for security problems.
+
+## Support
+
+For support requests, issues, and community questions, see [SUPPORT.md](SUPPORT.md).
+
+## Contributing
+
+Contributions are welcome. Please review [CONTRIBUTING.md](CONTRIBUTING.md) before opening a pull request.
+
+## License and governance
+
+This repository combines open-source and proprietary distribution boundaries:
+
+- open-source components live under the main project tree and are Apache 2.0 licensed
+- enterprise components are kept under the ee/ directory and are licensed separately
+- legal notices and contributor rules are documented in the repository root
 
 ---
 
-# ⚖ License
-
-Open Source components:
-
-```text
-Apache License 2.0
-```
-
-Enterprise components:
-
-```text
-HostMK Enterprise License
-```
-
-See:
-
-```text
-LICENSE
-ee/LICENSE
-NOTICE
-```
-
----
-
-# 📧 Contact
-
-Commercial Licensing:
-
-```text
-contact@hostmk.com
-```
-
----
-
-# 🔐 HostMK Security Framework
-
-Secure by Design.
-Multi-Tenant by Default.
-Enterprise Ready.
-Built for Modern SaaS.
+HostMK Security Framework © 2025
+Secure by design. Multi-tenant by default. Enterprise ready.

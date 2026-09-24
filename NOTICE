@@ -1,15 +1,15 @@
-HostMK-Security-Framework
+HostMK Security Framework
 
-Copyright (c) HostMK
+Copyright (c) 2025 HostMK
 
-This repository contains:
+This repository contains both open-source components and enterprise-specific components.
 
-- Open Source components licensed under Apache License 2.0
-- Enterprise Edition components licensed separately under /ee/LICENSE
+Open-source components in the project tree are licensed under the Apache License, Version 2.0, except for files under the ee/ directory, which are governed by the separate Enterprise License located at ee/LICENSE.
 
-The Apache License 2.0 does not apply to files contained in the /ee/
-directory.
+The Apache License 2.0 does not apply to files contained in the ee/ directory.
 
-For commercial licensing:
+For enterprise licensing, commercial inquiries, or support requests, contact:
 
 contact@hostmk.com
+
+This notice is provided to comply with the licensing requirements for the project and to clarify the repository’s open-source and enterprise split.

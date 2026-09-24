@@ -1,263 +1,81 @@
 # Security Policy
 
-## 🔐 HostMK Security Framework Security Policy
+## Overview
 
-The security of HostMK Security Framework is a top priority.
+HostMK Security Framework takes security seriously and expects all reports to be handled privately and responsibly. This policy covers supported versions, vulnerability reporting, and coordinated disclosure expectations.
 
-This document explains:
+## Supported versions
 
-- Supported versions
-- Security reporting procedures
-- Security best practices
-- Vulnerability management
-- Responsible disclosure policy
-- Security objectives of the framework
+The project currently supports the latest release line and the actively maintained branch. Legacy versions are not guaranteed to receive security patches.
 
----
+| Version / branch | Status |
+| --- | --- |
+| latest release | ✅ supported |
+| active main branch | ✅ supported |
+| previous release line | ⚠️ limited support |
+| unsupported or archived versions | ❌ not supported |
 
-# 🎯 Security Objectives
+## Reporting a vulnerability
 
-HostMK Security Framework is designed around the following principles:
+If you identify a vulnerability, please report it privately through one of the supported channels and do not disclose it publicly before we have had a chance to assess and remediate it.
 
-### 1. Secure by Design
+### Do not
 
-Security is integrated into the architecture from the beginning rather than added later.
+- open a public GitHub issue for the vulnerability
+- publish exploit details or proof-of-concept code
+- disclose the issue in public forums or social channels
+- attempt unauthorized access to user data or production systems
 
-### 2. Least Privilege
+### Please include
 
-Users, services, and applications should only receive the permissions they strictly require.
+- title and summary
+- affected component or module
+- reproduction steps or proof of concept
+- impact assessment
+- affected version or commit
+- suggested remediation, if known
 
-### 3. Defense in Depth
-
-Multiple layers of protection are implemented to reduce risk and limit impact.
-
-### 4. Tenant Isolation
-
-Multi-tenant environments must prevent unauthorized access between tenants.
-
-### 5. Encryption First
-
-Sensitive data should always be encrypted at rest and in transit.
-
-### 6. Continuous Verification
-
-Security controls should be continuously validated through testing and audits.
-
----
-
-# 🛡 Security Features
-
-Current security modules include:
-
-## Tenancy Security
-
-- Tenant isolation
-- Cross-tenant access prevention
-- Tenant validation
-- Tenant ownership verification
-
-## Permission Security
-
-- Permission validation
-- Access control verification
-- Authorization checks
-
-## Audit Security
-
-- Audit events
-- Security logging
-- Activity tracking
-- Compliance support
-
-## Fraud Security
-
-- Risk assessment
-- Fraud detection primitives
-- Event monitoring
-
-## Secret Security
-
-- AES-256 encryption
-- Secret rotation
-- Secret vault
-- Secure storage
-- Secret middleware
-
----
-
-# 🚧 Planned Security Features
-
-Future security modules include:
-
-## RBAC
-
-Role-Based Access Control
-
-Features:
-
-- Roles
-- Permissions
-- Policies
-- Inheritance
-- Access evaluation
-
----
-
-## JWT Authentication
-
-Features:
-
-- Access tokens
-- Refresh tokens
-- Token validation
-- Token revocation
-
----
-
-## API Key Security
-
-Features:
-
-- Key generation
-- Key rotation
-- Scope management
-- Key revocation
-
----
-
-## Rate Limiting
-
-Features:
-
-- Abuse protection
-- Request throttling
-- API protection
-
----
-
-## MFA / TOTP
-
-Features:
-
-- Two-factor authentication
-- Time-based one-time passwords
-- Backup codes
-
----
-
-## Session Security
-
-Features:
-
-- Session validation
-- Session expiration
-- Session revocation
-
----
-
-## Security Headers
-
-Features:
-
-- CSP
-- HSTS
-- X-Frame-Options
-- Referrer Policy
-
----
-
-## Webhook Security
-
-Features:
-
-- Signature validation
-- Replay protection
-- Secure delivery
-
----
-
-## IP Reputation
-
-Features:
-
-- Threat intelligence
-- Risk scoring
-- Reputation checks
-
----
-
-## Threat Detection Engine
-
-Features:
-
-- Security analytics
-- Anomaly detection
-- Risk evaluation
-- Threat monitoring
-
----
-
-# 🔒 Supported Versions
-
-Only the latest stable version is supported.
-
-| Version | Supported |
-|----------|----------|
-| Latest Release | ✅ |
-| Previous Releases | ⚠ Limited |
-| Legacy Releases | ❌ |
-
-Users are encouraged to upgrade to the latest version as soon as possible.
-
----
-
-# 🚨 Reporting a Vulnerability
-
-If you discover a security vulnerability:
-
-### Do NOT
-
-- Open a public GitHub issue
-- Publish exploit details
-- Share proof-of-concept code publicly
-
-### Do
-
-Send a report containing:
-
-- Vulnerability description
-- Impact assessment
-- Reproduction steps
-- Affected version
-- Suggested mitigation (if available)
-
-Contact:
+### Contact channels
 
 ```text
 security@hostmk.com
-```
-
-Alternative Contact:
-
-```text
 contact@hostmk.com
 ```
 
----
+You may also use the private security reporting flow in GitHub if enabled for the repository and tag the issue as a confidential security report.
 
-# 📋 Responsible Disclosure Policy
+## Responsible disclosure
 
-Researchers are encouraged to follow responsible disclosure practices.
+We ask researchers and contributors to:
 
-We request:
+1. report privately and not publicly disclose the issue before a fix is available
+2. avoid modifying or deleting user data during validation
+3. minimize impact on services and systems under test
+4. act in good faith and provide sufficient detail for triage
+5. cooperate with a reasonable remediation timeline
 
-1. Private reporting.
-2. Reasonable remediation time.
-3. No public disclosure before a fix is available.
-4. No unauthorized access to user data.
-5. No service disruption.
+## Remediation expectations
 
-Good-faith security research is appreciated.
+The maintainers will review reports as quickly as possible and will coordinate remediation, release updates, and any required public disclosure in a responsible manner. In some cases, publication of a security advisory may occur after the fix is released.
+
+## Security best practices
+
+This project relies on the following principles:
+
+- least privilege
+- tenant isolation
+- encryption for sensitive data
+- secure configuration and secret handling
+- code review for security-sensitive changes
+- continuous validation through tests and CI
+
+## Scope
+
+This policy applies to the open-source project as well as any repository-managed security-related processes. Enterprise-only features placed under the ee/ directory remain subject to the separate enterprise licensing and support model defined by that code base.
+
+## Acknowledgment
+
+We appreciate responsible security research and collaboration with the community. Security reports that respect the policy above are welcome and will be handled with confidentiality and care.
 
 ---
 

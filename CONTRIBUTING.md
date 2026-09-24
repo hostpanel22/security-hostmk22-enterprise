@@ -1,504 +1,161 @@
 # Contributing to HostMK Security Framework
 
-First of all, thank you for your interest in contributing to HostMK Security Framework. 🚀
+Thanks for your interest in contributing to HostMK Security Framework. We welcome high-quality improvements to documentation, governance, security hardening, tests, and developer tooling.
 
-This project aims to provide a modern, secure, multi-tenant security framework for SaaS platforms, APIs, cloud services, and enterprise applications.
+This repository is intentionally split between open-source core components and enterprise-only code under ee/. The contribution process below applies to the open-source project unless a specific enterprise contribution path is explicitly authorized.
 
-We welcome contributions from developers, security researchers, DevOps engineers, and open-source enthusiasts.
+## Contribution goals
 
----
+We value contributions that improve:
 
-# 🎯 Project Mission
+- security correctness
+- auditability and observability
+- multi-tenant safety
+- RBAC and authorization design
+- documentation clarity
+- test coverage and build stability
 
-HostMK Security Framework focuses on:
+## Repository scope
 
-- Multi-Tenant Security
-- Access Control
-- Secret Management
-- Authentication & Authorization
-- Security Middleware
-- Fraud Detection
-- Audit Logging
-- Threat Detection
-- Enterprise Security Extensions
-
-Our goal is to build a production-ready security framework that follows industry best practices and modern security standards.
-
----
-
-# 🤝 Ways to Contribute
-
-You can contribute in many ways:
-
-## Code Contributions
-
-Examples:
-
-- Bug fixes
-- Security improvements
-- New modules
-- Performance optimizations
-- Middleware development
-- Unit tests
-- Documentation improvements
-
----
-
-## Documentation
-
-Examples:
-
-- README improvements
-- Security documentation
-- API examples
-- Architecture diagrams
-- Tutorials
-
----
-
-## Security Research
-
-Examples:
-
-- Vulnerability reports
-- Security reviews
-- Threat modeling
-- Cryptography reviews
-- Penetration testing feedback
-
----
-
-## Testing
-
-Examples:
-
-- Unit testing
-- Integration testing
-- Performance testing
-- Security testing
-- Cross-platform validation
-
----
-
-# 📋 Before You Start
-
-Before making changes:
-
-1. Read the documentation.
-2. Review the project architecture.
-3. Check open issues.
-4. Verify that your contribution aligns with project goals.
-5. Ensure changes follow the project's coding standards.
-
----
-
-# 🔧 Development Environment
-
-Requirements:
-
-```text
-Go 1.22+
-Git
-```
-
-Clone the repository:
-
-```bash
-git clone https://github.com/your-org/HostMK-Security-Framework.git
-```
-
-Move into the project:
-
-```bash
-cd HostMK-Security-Framework
-```
-
-Install dependencies:
-
-```bash
-go mod tidy
-```
-
----
-
-# 🏗 Project Structure
-
-```text
-HostMK-Security-Framework/
-│
-├── core/
-│   ├── audit/
-│   ├── fraud/
-│   ├── permissions/
-│   ├── secrets/
-│   ├── tenancy/
-│   └── ...
-│
-├── tests/
-│
-├── docs/
-│
-├── ee/
-│
-├── LICENSE
-├── NOTICE
-└── README.md
-```
-
----
-
-# 🔓 Open Source vs Enterprise
-
-## Open Source
-
-Located in:
-
-```text
-core/
-```
-
-Licensed under:
-
-```text
-Apache License 2.0
-```
-
-Community contributions are welcome.
-
----
-
-## Enterprise Edition
-
-Located in:
+The open-source project is located in the main repository structure, while enterprise-only components remain under:
 
 ```text
 ee/
 ```
 
-Governed by:
+Do not contribute proprietary or enterprise-only code unless explicitly permitted by the maintainers.
 
-```text
-ee/LICENSE
+## Git workflow
+
+Use a clear branch-based workflow with short-lived feature branches.
+
+```bash
+git checkout -b fix/tenant-validation
+git commit -m "fix: validate tenant boundaries"
+git push origin fix/tenant-validation
 ```
 
-Enterprise Edition code is proprietary.
+Recommended branch patterns:
 
-Contributors may not submit Enterprise Edition code unless explicitly authorized by HostMK.
+- feature/*
+- fix/*
+- docs/*
+- chore/*
+- security/*
 
----
+Pull requests should be small and focused and should document the purpose of the change clearly.
 
-# 💻 Coding Standards
+## Before opening a PR
 
-All code should follow:
+Before submitting a contribution, please confirm the following:
 
-## General Rules
+1. the change is limited to the requested scope
+2. documentation and comments are updated when needed
+3. the code still builds and passes tests
+4. the change does not expand scope beyond the issue or ticket
+5. secrets or sensitive configuration are not committed
 
-- Keep code simple.
-- Keep code readable.
-- Avoid unnecessary complexity.
-- Prefer explicit behavior.
-- Write self-documenting code.
+## Required validation
 
----
+All contributions should pass the project checks before merge.
 
-## Naming
-
-Use clear and descriptive names.
-
-Good:
-
-```go
-ValidateTenant()
-EncryptSecret()
-HasPermission()
+```bash
+go fmt ./...
+go build ./...
+go test ./...
 ```
 
-Avoid:
+If the change affects security or authorization behavior, also review the relevant modules and tests for tenant, RBAC, permissions, or audit behavior.
 
-```go
-Do()
-Run()
-Process()
-```
+## Go style and coding standards
 
----
+Please keep code consistent with the repository’s Go conventions:
 
-## Error Handling
+- prefer clear, explicit logic over clever shortcuts
+- keep functions small and readable
+- return explicit errors instead of silent failures
+- validate security-sensitive inputs early
+- avoid introducing broad side effects without justification
+- keep concurrency and tenant boundaries easy to reason about
 
-Always return explicit errors.
+## Testing requirements
 
-Example:
-
-```go
-if tenantID == "" {
-    return ErrEmptyTenantID
-}
-```
-
-Avoid silent failures.
-
----
-
-## Security First
-
-Security takes priority over convenience.
+Contributions should include tests when new behavior is introduced or a bug is fixed.
 
 Examples:
 
-- Validate inputs.
-- Sanitize data.
-- Avoid insecure defaults.
-- Use strong cryptography.
-- Follow least privilege principles.
+- unit tests for validation or policy behavior
+- regression tests for tenant isolation issues
+- audit or fraud event tests when changing event models
 
----
-
-# 🧪 Testing Requirements
-
-Every new feature must include tests.
-
-Required:
-
-```text
-Feature Code
-+
-Unit Tests
-```
-
-Example:
-
-```text
-core/rbac/role.go
-tests/rbac/role_test.go
-```
-
----
-
-## Run Tests
-
-Run all tests:
+Test commands:
 
 ```bash
 go test ./...
 ```
 
-Run package tests:
+## Documentation requirements
 
-```bash
-go test ./tests/secrets
-```
+Documentation must be updated when a contribution changes:
 
----
+- public behavior
+- configuration requirements
+- module status
+- API routes or contracts
+- security guidance
+- architecture or roadmap notes
 
-## Coverage
+Relevant documentation includes:
 
-New functionality should include meaningful test coverage.
+- [README.md](README.md)
+- [docs/API.md](docs/API.md)
+- [docs/architecture.md](docs/architecture.md)
+- [SECURITY.md](SECURITY.md)
+- [SUPPORT.md](SUPPORT.md)
 
-Contributors should test:
+## Security contributions
 
-- Success paths
-- Error paths
-- Edge cases
-- Security scenarios
+If the contribution is related to a vulnerability, cryptography, authorization, or compliance issue, please follow [SECURITY.md](SECURITY.md) and report the issue privately.
 
----
+Do not disclose security issues publicly before coordination with maintainers.
 
-# 🔍 Static Analysis
+## Commit guidance
 
-Before submitting a contribution:
-
-Format code:
-
-```bash
-go fmt ./...
-```
-
-Run vet:
-
-```bash
-go vet ./...
-```
-
-Build:
-
-```bash
-go build ./...
-```
-
-Recommended:
-
-```bash
-gosec ./...
-```
-
-Recommended:
-
-```bash
-govulncheck ./...
-```
-
----
-
-# 🚨 Security Contributions
-
-Security-related contributions are highly encouraged.
-
-Examples:
-
-- Authentication hardening
-- Access control improvements
-- Cryptography reviews
-- Security middleware
-- Threat detection
-- Vulnerability fixes
-
----
-
-# 🔒 Reporting Security Vulnerabilities
-
-Do NOT open public GitHub issues for security vulnerabilities.
-
-Instead contact:
-
-```text
-security@hostmk.com
-```
-
-or
-
-```text
-contact@hostmk.com
-```
-
-See:
-
-```text
-docs/security.md
-```
-
-for the complete security policy.
-
----
-
-# 📝 Commit Message Guidelines
-
-Use clear commit messages.
+Use clear and conventional commit messages.
 
 Examples:
 
 ```text
-feat: add rbac role validation
+feat: add tenant validation middleware
+fix: prevent cross-tenant access in RBAC checks
+docs: align README and support policy
+security: harden secret handling validation
+test: add regression coverage for fraud scoring
 ```
 
-```text
-feat: implement api key manager
-```
+## Pull request checklist
 
-```text
-fix: prevent cross tenant access
-```
+Before opening or updating a PR, confirm:
 
-```text
-fix: validate secret rotation policy
-```
+- [ ] code is formatted
+- [ ] go build ./... passes
+- [ ] go test ./... passes
+- [ ] docs are updated where necessary
+- [ ] no secrets or credentials are included
+- [ ] security-sensitive changes are reviewed
 
-```text
-docs: update security documentation
-```
+## Code of conduct
 
-```text
-test: add vault integration tests
-```
+Contributors are expected to behave respectfully and professionally. Disruptive, abusive, or malicious behavior is not acceptable.
 
----
+See [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) for the community expectations.
 
-# 🔄 Pull Request Guidelines
+## Support and governance
 
-Before opening a Pull Request:
+For support requests, bug reports, and operational questions, please review [SUPPORT.md](SUPPORT.md). For responsible vulnerability disclosure, use [SECURITY.md](SECURITY.md).
 
-- Ensure tests pass.
-- Ensure code builds successfully.
-- Ensure formatting is correct.
-- Ensure documentation is updated.
-- Ensure no secrets are committed.
+## License
 
-Checklist:
+By contributing to this project, you agree that your work may be distributed under the repository’s applicable license terms. Open-source contributions are covered by the Apache 2.0 license for the non-enterprise code paths, while enterprise-only files remain governed by the enterprise license model.
 
-```text
-[ ] Tests pass
-[ ] Build passes
-[ ] Documentation updated
-[ ] No secrets committed
-[ ] Security reviewed
-```
-
----
-
-# 📚 Documentation Requirements
-
-Documentation should be updated when:
-
-- New modules are added.
-- Public APIs change.
-- Security features change.
-- Architecture changes.
-
-Relevant files:
-
-```text
-README.md
-docs/architecture.md
-docs/security.md
-docs/roadmap.md
-```
-
----
-
-# ⚖ License
-
-By contributing to this project, you agree that your contributions may be distributed under the project's applicable licenses.
-
-Open Source contributions are governed by:
-
-```text
-Apache License 2.0
-```
-
-Enterprise Edition components remain subject to:
-
-```text
-ee/LICENSE
-```
-
----
-
-# 🙏 Code of Conduct
-
-Be respectful.
-
-We do not tolerate:
-
-- Harassment
-- Hate speech
-- Discrimination
-- Malicious contributions
-- Intentional security backdoors
-
-Professional and constructive collaboration is expected.
-
----
-
-# 🚀 Thank You
-
-Every contribution helps improve the security and quality of HostMK Security Framework.
-
-Together we can build a modern, secure, enterprise-grade security ecosystem for developers worldwide.
-
----
-
-🔐 HostMK Security Framework
-
-Secure by Design.
-Defense in Depth.
-Multi-Tenant by Default.
-Enterprise Ready.
+Thank you for helping keep the framework secure, maintainable, and professional.
