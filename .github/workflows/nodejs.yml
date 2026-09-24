@@ -24,7 +24,6 @@ jobs:
 
       matrix:
         node-version:
-          - 20
           - 22
 
     steps:
@@ -37,22 +36,22 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
           cache: npm
-          cache-dependency-path: sdk/nodejs/package-lock.json
+          cache-dependency-path: sdk/node/package-lock.json
 
       - name: Install dependencies
-        working-directory: sdk/nodejs
+        working-directory: sdk/node
         run: npm ci
 
       - name: Run ESLint
-        working-directory: sdk/nodejs
+        working-directory: sdk/node
         run: npm run lint --if-present
 
       - name: Run TypeScript build
-        working-directory: sdk/nodejs
+        working-directory: sdk/node
         run: npm run build --if-present
 
       - name: Run tests
-        working-directory: sdk/nodejs
+        working-directory: sdk/node
         run: npm test -- --coverage
 
       - name: Upload coverage
@@ -60,7 +59,7 @@ jobs:
         if: always()
         with:
           name: node-coverage-${{ matrix.node-version }}
-          path: sdk/nodejs/coverage
+          path: sdk/node/coverage
           if-no-files-found: ignore
 
   security:
@@ -79,12 +78,12 @@ jobs:
         with:
           node-version: 22
           cache: npm
-          cache-dependency-path: sdk/nodejs/package-lock.json
+          cache-dependency-path: sdk/node/package-lock.json
 
       - name: Install dependencies
-        working-directory: sdk/nodejs
+        working-directory: sdk/node
         run: npm ci
 
       - name: NPM Audit
-        working-directory: sdk/nodejs
+        working-directory: sdk/node
         run: npm audit --audit-level=high || true

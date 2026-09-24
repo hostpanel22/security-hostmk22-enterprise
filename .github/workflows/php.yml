@@ -18,6 +18,10 @@ jobs:
 
     runs-on: ubuntu-latest
 
+    defaults:
+      run:
+        working-directory: sdk/php
+
     strategy:
       fail-fast: false
 
@@ -59,7 +63,7 @@ jobs:
         if: always()
         with:
           name: php-coverage-${{ matrix.php-version }}
-          path: coverage/
+          path: sdk/php/coverage/
           if-no-files-found: ignore
 
   quality:
@@ -67,6 +71,10 @@ jobs:
     name: Static Analysis
 
     runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: sdk/php
 
     steps:
 
