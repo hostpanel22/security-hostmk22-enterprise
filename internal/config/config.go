@@ -22,11 +22,11 @@ const (
 )
 
 type Config struct {
-	App        AppConfig
-	DB         DatabaseConfig
-	JWT        JWTConfig
-	Crypto     CryptoConfig
-	Telemetry  TelemetryConfig
+	App       AppConfig
+	DB        DatabaseConfig
+	JWT       JWTConfig
+	Crypto    CryptoConfig
+	Telemetry TelemetryConfig
 }
 
 type AppConfig struct {

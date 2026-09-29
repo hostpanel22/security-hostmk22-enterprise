@@ -864,10 +864,10 @@ func (a *API) FraudAnalyze(w http.ResponseWriter, r *http.Request) {
 	}
 
 	response.OK(w, "fraud analysis completed", map[string]any{
-		"risk_score": score,
-		"risk_level": level,
-		"blocked":    blocked,
-		"matched":    matched,
+		"risk_score":  score,
+		"risk_level":  level,
+		"blocked":     blocked,
+		"matched":     matched,
 		"analyzed_at": time.Now().UTC(),
 	})
 }

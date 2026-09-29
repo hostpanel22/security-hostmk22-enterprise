@@ -7,19 +7,19 @@ import (
 )
 
 type APIKey struct {
-	ID          string     `json:"id" db:"id"`
-	TenantID    string     `json:"tenant_id" db:"tenant_id"`
-	Name        string     `json:"name" db:"name"`
-	Prefix      string     `json:"prefix" db:"prefix"`
-	KeyHash     string     `json:"-" db:"key_hash"`
-	Plaintext   string     `json:"key,omitempty"`
-	Scopes      []string   `json:"scopes"`
-	RateLimit   *int       `json:"rate_limit,omitempty" db:"rate_limit"`
-	ExpiresAt   *time.Time `json:"expires_at,omitempty" db:"expires_at"`
-	RevokedAt   *time.Time `json:"revoked_at,omitempty" db:"revoked_at"`
-	LastUsedAt  *time.Time `json:"last_used_at,omitempty" db:"last_used_at"`
-	CreatedAt   time.Time  `json:"created_at" db:"created_at"`
-	UpdatedAt   time.Time  `json:"updated_at" db:"updated_at"`
+	ID         string     `json:"id" db:"id"`
+	TenantID   string     `json:"tenant_id" db:"tenant_id"`
+	Name       string     `json:"name" db:"name"`
+	Prefix     string     `json:"prefix" db:"prefix"`
+	KeyHash    string     `json:"-" db:"key_hash"`
+	Plaintext  string     `json:"key,omitempty"`
+	Scopes     []string   `json:"scopes"`
+	RateLimit  *int       `json:"rate_limit,omitempty" db:"rate_limit"`
+	ExpiresAt  *time.Time `json:"expires_at,omitempty" db:"expires_at"`
+	RevokedAt  *time.Time `json:"revoked_at,omitempty" db:"revoked_at"`
+	LastUsedAt *time.Time `json:"last_used_at,omitempty" db:"last_used_at"`
+	CreatedAt  time.Time  `json:"created_at" db:"created_at"`
+	UpdatedAt  time.Time  `json:"updated_at" db:"updated_at"`
 }
 
 func (k *APIKey) Normalize() {

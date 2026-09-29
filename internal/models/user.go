@@ -18,19 +18,19 @@ const (
 )
 
 type User struct {
-	ID               string     `json:"id" db:"id"`
-	TenantID         string     `json:"tenant_id" db:"tenant_id"`
-	Email            string     `json:"email" db:"email"`
-	PasswordHash     string     `json:"-" db:"password_hash"`
-	Name             string     `json:"name" db:"name"`
-	Status           UserStatus `json:"status" db:"status"`
-	EmailVerifiedAt  *time.Time `json:"email_verified_at,omitempty" db:"email_verified_at"`
-	MFAEnabled       bool       `json:"mfa_enabled" db:"mfa_enabled"`
-	MFASecretEnc     []byte     `json:"-" db:"mfa_secret_enc"`
-	RoleIDs          []string   `json:"role_ids,omitempty"`
-	CreatedAt        time.Time  `json:"created_at" db:"created_at"`
-	UpdatedAt        time.Time  `json:"updated_at" db:"updated_at"`
-	LastLogin        *time.Time `json:"last_login,omitempty" db:"last_login"`
+	ID              string     `json:"id" db:"id"`
+	TenantID        string     `json:"tenant_id" db:"tenant_id"`
+	Email           string     `json:"email" db:"email"`
+	PasswordHash    string     `json:"-" db:"password_hash"`
+	Name            string     `json:"name" db:"name"`
+	Status          UserStatus `json:"status" db:"status"`
+	EmailVerifiedAt *time.Time `json:"email_verified_at,omitempty" db:"email_verified_at"`
+	MFAEnabled      bool       `json:"mfa_enabled" db:"mfa_enabled"`
+	MFASecretEnc    []byte     `json:"-" db:"mfa_secret_enc"`
+	RoleIDs         []string   `json:"role_ids,omitempty"`
+	CreatedAt       time.Time  `json:"created_at" db:"created_at"`
+	UpdatedAt       time.Time  `json:"updated_at" db:"updated_at"`
+	LastLogin       *time.Time `json:"last_login,omitempty" db:"last_login"`
 }
 
 func (u *User) Normalize() {

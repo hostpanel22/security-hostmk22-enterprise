@@ -35,6 +35,7 @@ func NewRouter(api *handlers.API) http.Handler {
 	mux.Handle("/api/v1/permissions/check", protect("permissions", api.PermissionCheck))
 	mux.Handle("/api/v1/api-keys", protect("api_keys", api.APIKeys))
 	mux.Handle("/api/v1/secrets", protect("secrets", api.Secrets))
+	mux.Handle("/api/v1/sessions", protect("sessions", api.Sessions))
 	mux.Handle("/api/v1/audit/events", protect("audit", api.AuditEvents))
 	mux.Handle("/api/v1/fraud/rules", protect("fraud", api.FraudRules))
 	mux.Handle("/api/v1/fraud/analyze", protect("fraud", api.FraudAnalyze))
