@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: com.hostmk.sdk.HostMKClientTest
+-------------------------------------------------------------------------------
+Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.132 s -- in com.hostmk.sdk.HostMKClientTest

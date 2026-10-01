@@ -1,0 +1,46 @@
+{
+  "name": "hostmk/security-laravel",
+  "description": "Laravel integration for the HostMK Security Framework API",
+  "type": "library",
+  "license": "MIT",
+  "require": {
+    "php": "^8.1",
+    "illuminate/http": "^10.0 || ^11.0 || ^12.0",
+    "illuminate/support": "^10.0 || ^11.0 || ^12.0"
+  },
+  "require-dev": {
+    "orchestra/testbench": "^8.0 || ^9.0 || ^10.0",
+    "phpunit/phpunit": "^10.5 || ^11.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "HostMK\\Laravel\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "HostMK\\Laravel\\Tests\\": "tests/"
+    }
+  },
+  "extra": {
+    "laravel": {
+      "providers": [
+        "HostMK\\Laravel\\HostMKServiceProvider"
+      ],
+      "aliases": {
+        "HostMK": "HostMK\\Laravel\\Facades\\HostMK"
+      }
+    }
+  },
+  "scripts": {
+    "test": "phpunit"
+  },
+  "config": {
+    "sort-packages": true,
+    "allow-plugins": {
+      "php-http/discovery": true
+    }
+  },
+  "minimum-stability": "stable",
+  "prefer-stable": true
+}
