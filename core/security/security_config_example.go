@@ -83,7 +83,7 @@ func DevelopmentSecurityConfig() SecurityConfig {
 			SessionExpiry:   24 * time.Hour,
 			SessionSecure:   false,
 			SessionHttpOnly: true,
-			SessionSameSite: http.SameSiteLaxMode,
+			SessionSameSite: "lax",
 		},
 	}
 }
@@ -166,7 +166,7 @@ func StagingSecurityConfig() SecurityConfig {
 			SessionExpiry:   24 * time.Hour,
 			SessionSecure:   true,
 			SessionHttpOnly: true,
-			SessionSameSite: http.SameSiteLaxMode,
+			SessionSameSite: "lax",
 		},
 	}
 }
@@ -253,7 +253,7 @@ func ProductionSecurityConfig() SecurityConfig {
 			SessionExpiry:   24 * time.Hour,
 			SessionSecure:   true,
 			SessionHttpOnly: true,
-			SessionSameSite: http.SameSiteLaxMode,
+			SessionSameSite: "lax",
 		},
 	}
 }
@@ -339,7 +339,7 @@ func ParanoidSecurityConfig() SecurityConfig {
 			SessionExpiry:   time.Hour,
 			SessionSecure:   true,
 			SessionHttpOnly: true,
-			SessionSameSite: http.SameSiteStrictMode,
+			SessionSameSite: "strict",
 		},
 	}
 }
