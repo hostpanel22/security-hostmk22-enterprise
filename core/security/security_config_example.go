@@ -4,6 +4,7 @@
 package security
 
 import (
+	"net/http"
 	"time"
 )
 
@@ -340,21 +341,5 @@ func ParanoidSecurityConfig() SecurityConfig {
 			SessionHttpOnly: true,
 			SessionSameSite: http.SameSiteStrictMode,
 		},
-	}
-}
-
-// GetSecurityConfig returns a security configuration based on the environment
-func GetSecurityConfig(level SecurityLevel) SecurityConfig {
-	switch level {
-	case SecurityLevelMinimal:
-		return DevelopmentSecurityConfig()
-	case SecurityLevelStandard:
-		return DefaultSecurityConfig()
-	case SecurityLevelProduction:
-		return ProductionSecurityConfig()
-	case SecurityLevelParanoid:
-		return ParanoidSecurityConfig()
-	default:
-		return DefaultSecurityConfig()
 	}
 }

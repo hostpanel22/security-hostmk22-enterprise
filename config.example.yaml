@@ -1,0 +1,495 @@
+# HostMK Security Framework - Configuration Example
+# Copy this file to config.yaml and customize for your environment
+
+# ============================================================================
+# Application Configuration
+# ============================================================================
+app:
+  name: "HostMK Security Framework"
+  version: "1.0.0"
+  environment: "development"  # development, staging, production
+  debug: true
+  host: "0.0.0.0"
+  port: 8080
+  shutdown_timeout: "30s"
+
+# ============================================================================
+# Database Configuration
+# ============================================================================
+database:
+  driver: "postgres"  # postgres, mysql, sqlite, mssql
+  url: "postgresql://postgres:postgres@localhost:5432/security?sslmode=disable"
+  
+  # Connection pool settings
+  pool:
+    max_open_connections: 25
+    max_idle_connections: 5
+    max_lifetime: "30m"
+    max_idle_time: "5m"
+  
+  # Migration settings
+  migrations:
+    directory: "./migrations"
+    table: "schema_migrations"
+
+# ============================================================================
+# Redis Configuration
+# ============================================================================
+redis:
+  url: "redis://localhost:6379/0"
+  password: ""
+  
+  # Connection pool settings
+  pool:
+    max_active: 100
+    max_idle: 10
+    idle_timeout: "5m"
+    wait: true
+  
+  # Cache settings
+  cache:
+    enabled: true
+    default_ttl: "1h"
+    max_ttl: "24h"
+
+# ============================================================================
+# JWT Configuration
+# ============================================================================
+jwt:
+  # Secret key for signing tokens (32+ characters)
+  secret: "your-super-secret-jwt-key-at-least-32-characters-long"
+  
+  # Token expiration
+  access_token:
+    expires_in: "15m"
+    issuer: "hostmk-security"
+    audience: "hostmk-api"
+  
+  refresh_token:
+    expires_in: "7d"
+    issuer: "hostmk-security"
+    audience: "hostmk-api"
+  
+  # Token rotation
+  rotation:
+    enabled: true
+    reuse_interval: "1h"
+
+# ============================================================================
+# Encryption Configuration
+# ============================================================================
+encryption:
+  # Encryption key for sensitive data (32 bytes for AES-256)
+  key: "your-32-byte-encryption-key-for-aes-256-gcm"
+  
+  # Encryption algorithm
+  algorithm: "aes-256-gcm"
+
+# ============================================================================
+# Security Configuration
+# ============================================================================
+security:
+  # CORS settings
+  cors:
+    enabled: true
+    allowed_origins:
+      - "http://localhost:3000"
+      - "http://localhost:3001"
+      - "http://localhost:8080"
+    allowed_methods:
+      - "GET"
+      - "POST"
+      - "PUT"
+      - "PATCH"
+      - "DELETE"
+      - "OPTIONS"
+      - "HEAD"
+    allowed_headers:
+      - "Content-Type"
+      - "Authorization"
+      - "X-Request-ID"
+      - "X-Tenant-ID"
+    exposed_headers:
+      - "X-Request-ID"
+      - "X-Response-Time"
+    max_age: "86400s"
+    credentials: true
+  
+  # CSRF protection
+  csrf:
+    enabled: true
+    cookie_name: "XSRF-TOKEN"
+    cookie_secure: false  # Set to true in production
+    cookie_http_only: true
+    cookie_same_site: "Lax"
+    header_name: "X-XSRF-TOKEN"
+  
+  # Rate limiting
+  rate_limit:
+    enabled: true
+    window: "15m"
+    max_requests: 100
+    
+    # Per-endpoint overrides
+    endpoints:
+      "/api/v1/auth/login":
+        window: "1m"
+        max_requests: 5
+      "/api/v1/auth/register":
+        window: "1m"
+        max_requests: 3
+      "/api/v1/auth/refresh":
+        window: "1m"
+        max_requests: 10
+  
+  # Brute force protection
+  brute_force:
+    enabled: true
+    max_attempts: 5
+    lockout_duration: "15m"
+    
+    # IP-based tracking
+    ip_tracking:
+      enabled: true
+      prefix_length: 24  # IPv4 prefix length for grouping
+  
+  # Request size limits
+  request_size:
+    max_body_size: "10MB"
+    max_header_size: "1MB"
+    max_multipart_memory: "32MB"
+  
+  # Security headers
+  headers:
+    hsts:
+      enabled: true
+      max_age: "31536000s"  # 1 year
+      include_subdomains: true
+      preload: true
+    
+    csp:
+      enabled: true
+      policy: |
+        default-src 'self';
+        script-src 'self' 'unsafe-inline' 'unsafe-eval';
+        style-src 'self' 'unsafe-inline';
+        img-src 'self' data:;
+        font-src 'self';
+        connect-src 'self';
+        frame-src 'none';
+        object-src 'none';
+        base-uri 'self';
+        form-action 'self';
+    
+    xss_protection: "1; mode=block"
+    frame_options: "DENY"
+    content_type_options: "nosniff"
+    referrer_policy: "strict-origin-when-cross-origin"
+    permissions_policy: "geolocation=(), microphone=(), camera=()"
+
+# ============================================================================
+# Authentication Configuration
+# ============================================================================
+auth:
+  # Default authentication method
+  default_method: "jwt"
+  
+  # Session settings
+  session:
+    enabled: true
+    timeout: "24h"
+    cookie_name: "session"
+    cookie_secure: false  # Set to true in production
+    cookie_http_only: true
+    cookie_same_site: "Lax"
+  
+  # Password policy
+  password:
+    min_length: 8
+    max_length: 128
+    require_uppercase: true
+    require_lowercase: true
+    require_number: true
+    require_special: true
+    special_characters: "!@#$%^&*(),.?\":{}|<>"
+    max_failed_attempts: 5
+    lockout_duration: "15m"
+
+# ============================================================================
+# Multi-Tenancy Configuration
+# ============================================================================
+tenancy:
+  enabled: true
+  
+  # Tenant identification
+  identification:
+    header: "X-Tenant-ID"
+    query_param: "tenant_id"
+    claim: "tenantId"
+  
+  # Tenant isolation
+  isolation:
+    strict: true
+    validate_on_every_request: true
+  
+  # Default tenant for single-tenant mode
+  default_tenant: "default"
+
+# ============================================================================
+# RBAC Configuration
+# ============================================================================
+rbac:
+  enabled: true
+  
+  # Default roles
+  default_roles:
+    - "user"
+    - "admin"
+    - "super_admin"
+  
+  # Role hierarchy (higher number = more privileges)
+  hierarchy:
+    user: 1
+    admin: 2
+    super_admin: 3
+  
+  # Default permissions per role
+  default_permissions:
+    user:
+      - "read:own"
+      - "write:own"
+    admin:
+      - "read:all"
+      - "write:all"
+      - "delete:own"
+    super_admin:
+      - "*"
+
+# ============================================================================
+# Audit Logging Configuration
+# ============================================================================
+audit:
+  enabled: true
+  
+  # Audit log storage
+  storage:
+    type: "database"  # database, file, both
+    
+    # Database storage
+    database:
+      table: "audit_logs"
+      retention_days: 90
+    
+    # File storage
+    file:
+      directory: "./logs/audit"
+      rotation: "daily"
+      max_size: "100MB"
+      max_files: 30
+  
+  # Actions to audit
+  actions:
+    - "AUTHENTICATION_SUCCESS"
+    - "AUTHENTICATION_FAILED"
+    - "AUTHORIZATION_FAILED"
+    - "USER_CREATED"
+    - "USER_UPDATED"
+    - "USER_DELETED"
+    - "TENANT_CREATED"
+    - "TENANT_UPDATED"
+    - "TENANT_DELETED"
+    - "ROLE_ASSIGNED"
+    - "PERMISSION_GRANTED"
+    - "PASSWORD_CHANGED"
+    - "SETTINGS_UPDATED"
+  
+  # Sensitive fields to mask in audit logs
+  sensitive_fields:
+    - "password"
+    - "token"
+    - "secret"
+    - "apiKey"
+    - "creditCard"
+    - "ssn"
+
+# ============================================================================
+# Fraud Detection Configuration
+# ============================================================================
+fraud:
+  enabled: true
+  
+  # Detection rules
+  rules:
+    # Too many requests from same IP
+    - id: "ip_rate_limit"
+      type: "rate_limit"
+      threshold: 100
+      window: "15m"
+      severity: "medium"
+      action: "log_and_block"
+    
+    # Brute force login attempts
+    - id: "brute_force_login"
+      type: "brute_force"
+      threshold: 5
+      window: "1m"
+      severity: "high"
+      action: "lock_account"
+    
+    # Suspicious user agent
+    - id: "suspicious_user_agent"
+      type: "pattern_match"
+      pattern: "(sqlmap|nikto|dirbuster|hydra|nmap)"
+      field: "userAgent"
+      severity: "high"
+      action: "block"
+    
+    # Impossible travel detection
+    - id: "impossible_travel"
+      type: "impossible_travel"
+      max_distance_km: 1000
+      time_window_minutes: 60
+      severity: "critical"
+      action: "lock_account_and_notify"
+
+# ============================================================================
+# Secrets Management Configuration
+# ============================================================================
+secrets:
+  enabled: true
+  
+  # Encryption for secrets at rest
+  encryption:
+    enabled: true
+    algorithm: "aes-256-gcm"
+    key_rotation_interval: "90d"
+  
+  # Secrets storage
+  storage:
+    type: "database"  # database, vault, aws_secrets_manager, gcp_secret_manager
+    
+    # HashiCorp Vault configuration
+    vault:
+      address: ""
+      token: ""
+      kv_engine: "secret"
+      kv_path: "hostmk"
+
+# ============================================================================
+# Logging Configuration
+# ============================================================================
+logging:
+  level: "info"  # debug, info, warn, error, fatal
+  
+  # Console output
+  console:
+    enabled: true
+    format: "json"  # json, text
+    colors: true
+  
+  # File output
+  file:
+    enabled: true
+    directory: "./logs"
+    rotation: "daily"
+    max_size: "100MB"
+    max_files: 30
+    compress: true
+  
+  # Structured logging
+  structured: true
+  
+  # Log fields
+  fields:
+    service: "hostmk-security"
+    version: "1.0.0"
+    environment: "${app.environment}"
+
+# ============================================================================
+# Metrics Configuration
+# ============================================================================
+metrics:
+  enabled: true
+  
+  # Prometheus metrics
+  prometheus:
+    enabled: true
+    port: 9090
+    path: "/metrics"
+  
+  # OpenTelemetry
+  opentelemetry:
+    enabled: false
+    endpoint: ""
+    sampler:
+      type: "parentbased_traceidratio"
+      ratio: 0.1
+
+# ============================================================================
+# Health Check Configuration
+# ============================================================================
+health:
+  enabled: true
+  
+  # Liveness probe
+  liveness:
+    path: "/health"
+    interval: "30s"
+    timeout: "10s"
+    threshold: 3
+  
+  # Readiness probe
+  readiness:
+    path: "/ready"
+    interval: "10s"
+    timeout: "5s"
+    threshold: 3
+  
+  # Database health check
+  database:
+    check_interval: "30s"
+    timeout: "5s"
+    max_retries: 3
+
+# ============================================================================
+# API Configuration
+# ============================================================================
+api:
+  prefix: "/api/v1"
+  
+  # Pagination defaults
+  pagination:
+    default_page: 1
+    default_page_size: 20
+    max_page_size: 100
+  
+  # Sorting defaults
+  sorting:
+    default_sort_by: "createdAt"
+    default_sort_order: "desc"
+
+# ============================================================================
+# Feature Flags
+# ============================================================================
+feature_flags:
+  # Enable experimental features
+  experimental:
+    new_auth_flow: false
+    advanced_audit: false
+    ai_fraud_detection: false
+  
+  # Enable beta features
+  beta:
+    multi_factor_auth: true
+    sso_integration: false
+
+---
+# Configuration Notes:
+# 1. For production, use strong, randomly generated secrets
+# 2. Enable HTTPS with valid certificates
+# 3. Set cookie_secure to true in production
+# 4. Configure proper CORS origins
+# 5. Set appropriate rate limits
+# 6. Monitor logs and metrics
+# 7. Rotate secrets regularly
+# 8. Keep dependencies updated

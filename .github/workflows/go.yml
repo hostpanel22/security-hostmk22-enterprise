@@ -1,0 +1,285 @@
+name: Go CI/CD
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+      - release/*
+    tags:
+      - v*
+
+  pull_request:
+    branches:
+      - main
+      - develop
+
+  schedule:
+    # Run security scans every day at midnight
+    - cron: '0 0 * * *'
+
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Test & Build
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        go-version: ['1.26']
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ matrix.go-version }}
+          cache: true
+          cache-dependency-path: go.sum
+
+      - name: Install dependencies
+        run: go mod download
+
+      - name: Verify dependencies
+        run: go mod verify
+
+      - name: Tidy dependencies
+        run: go mod tidy
+
+      - name: Check for go mod changes
+        run: |
+          git diff --name-only | grep -E '^(go\.(mod|sum)|(.+\.go)$)' || true
+
+      - name: Run Go vet
+        run: go vet ./...
+
+      - name: Run Go fmt check
+        run: |
+          if [ "$(gofmt -l .)" != "" ]; then
+            echo "Files need formatting:"
+            gofmt -l .
+            exit 1
+          fi
+
+      - name: Run static analysis
+        uses: golangci/golangci-lint-action@v6
+        with:
+          version: v1.61
+          args: --config=.golangci.yml --timeout=5m --verbose
+          only-new-issues: true
+
+      - name: Run tests with race detector
+        run: go test -race -v -coverprofile=coverage.out -covermode=atomic ./...
+
+      - name: Upload coverage
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: go-coverage-${{ matrix.go-version }}
+          path: coverage.out
+          if-no-files-found: ignore
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        if: always()
+        with:
+          file: coverage.out
+          token: ${{ secrets.CODECOV_TOKEN }}
+          fail_ci_if_error: false
+
+  security:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    needs: test
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.fork == false
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.26'
+
+      - name: Install dependencies
+        run: go mod download
+
+      - name: Run Go security check
+        uses: golang/govulncheck-action@v1
+        with:
+          go-version-input: '1.26'
+          work-dir: .
+
+      - name: Run Gosec security scanner
+        uses: gosec-action@v1
+        with:
+          args: -include=G101,G102,G103,G104,G106,G107,G108,G201,G202,G203,G204,G301,G302,G304,G306,G307,G401,G402,G403,G404,G501,G502,G503,G504,G505,G601 ./...
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@v0.20
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          exit-code: '1'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    needs: [test, security]
+    if: github.event_name == 'push' && (startsWith(github.ref, 'refs/tags/v') || github.ref == 'refs/heads/main')
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.26'
+
+      - name: Install dependencies
+        run: go mod download
+
+      - name: Build for Linux amd64
+        run: |
+          GOOS=linux GOARCH=amd64 go build -o dist/hostmk-security-linux-amd64 ./cmd/server
+          sha256sum dist/hostmk-security-linux-amd64 > dist/hostmk-security-linux-amd64.sha256
+
+      - name: Build for Linux arm64
+        run: |
+          GOOS=linux GOARCH=arm64 go build -o dist/hostmk-security-linux-arm64 ./cmd/server
+          sha256sum dist/hostmk-security-linux-arm64 > dist/hostmk-security-linux-arm64.sha256
+
+      - name: Build for Darwin amd64
+        run: |
+          GOOS=darwin GOARCH=amd64 go build -o dist/hostmk-security-darwin-amd64 ./cmd/server
+          sha256sum dist/hostmk-security-darwin-amd64 > dist/hostmk-security-darwin-amd64.sha256
+
+      - name: Build for Darwin arm64
+        run: |
+          GOOS=darwin GOARCH=arm64 go build -o dist/hostmk-security-darwin-arm64 ./cmd/server
+          sha256sum dist/hostmk-security-darwin-arm64 > dist/hostmk-security-darwin-arm64.sha256
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: hostmk-security-binaries
+          path: dist/*
+          if-no-files-found: error
+
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/v')
+
+    permissions:
+      contents: write
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: hostmk-security-binaries
+          path: dist
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*
+          generate_release_notes: true
+          draft: false
+          prerelease: false
+
+      - name: Publish to Docker Hub
+        if: false # Disabled for now, enable when Docker Hub is configured
+        run: |
+          echo "Docker publishing disabled"
+          # docker build -t hostmk/security-framework:${{ github.ref_name }} .
+          # docker push hostmk/security-framework:${{ github.ref_name }}
+
+  docker:
+    name: Docker Build
+    runs-on: ubuntu-latest
+    needs: test
+    if: github.event_name == 'push' && (startsWith(github.ref, 'refs/tags/v') || github.ref == 'refs/heads/main')
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker Hub
+        if: false # Disabled for now
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_TOKEN }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          push: false # Set to true when Docker Hub is configured
+          tags: |
+            hostmk/security-framework:latest
+            hostmk/security-framework:${{ github.sha }}
+          labels: |
+            org.opencontainers.image.source=${{ github.repository }}
+            org.opencontainers.image.version=${{ github.ref_name }}
+            org.opencontainers.image.created=${{ github.event.repository.pushed_at }}
+
+  codeql:
+    name: CodeQL Analysis
+    runs-on: ubuntu-latest
+    needs: test
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.fork == false
+
+    permissions:
+      security-events: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: go
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:go"
+
+  dependabot:
+    name: Dependabot Security Updates
+    runs-on: ubuntu-latest
+    needs: test
+    if: github.event_name == 'schedule'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run Dependabot
+        run: echo "Dependabot runs automatically via GitHub"

@@ -1,0 +1,297 @@
+# GolangCI-Lint configuration for HostMK Security Framework
+
+run:
+  # Timeout for analysis, e.g. 30s, 5m, default is 1m
+  timeout: 5m
+
+  # Exit code when at least one issue was found, default is 1
+  issues-exit-code: 1
+
+  # Include test files or not, default is true
+  tests: true
+
+  # Which dirs to skip: issues from them won't be reported
+  # Can be overridden by `skip-dirs-use-default` in CLI
+  skip-dirs:
+    - vendor$
+    - third_party$
+    - testdata$
+    - examples$
+    - cmd/mocks$
+    - .*
+
+  # Which files to skip: they won't be analyzed
+  skip-files:
+    - "_test\\.go$"
+    - ".*\\_test\\.go$"
+
+output:
+  # Colored line numbers in output, default is true
+  color-line-number: true
+
+  # Format: colored-line-number|line-number|json|tab|checkstyle|code-climate|junit-xml|github-actions
+  # Default: colored-line-number
+  format: colored-line-number
+
+  # Print lines of code with issue, default is true
+  print-issued-lines: true
+
+  # Print linter name in output, default is true
+  print-linter-name: true
+
+  # Print paths with issues, default is true
+  print-path: true
+
+  # Print absolute paths, default is false
+  print-absolute-path: false
+
+  # Paths with issues to output, default: all
+  paths:
+    - all
+
+  # Sort results by: path, line, column, linter, message, severity
+  sort-results-by: path
+
+linters:
+  # Disable all linters by default
+  disable-all: true
+
+  # Enable specific linters
+  enable:
+    # Style linters
+    - errcheck        # Check for unchecked errors
+    - gofmt           # Check formatting
+    - goimports       # Check import formatting
+    - gocyclo         # Check function cyclomatic complexity
+    - gocognit        # Check cognitive complexity
+    - dupl            # Check for duplicate code
+    - lll             # Check line length
+    - nakedret        # Check for naked returns
+    - prealloc        # Check for slice preallocation
+    - stylecheck      # Check style
+    - unconvert       # Check for unnecessary conversions
+    - unused          # Check for unused code
+    - varcheck        # Check for unused variables
+
+    # Security linters
+    - gosec           # Security checker
+    - sqlclosecheck   # Check for unclosed SQL rows
+    - bodyclose       # Check for unclosed HTTP response bodies
+
+    # Performance linters
+    - gocritic        # Check for performance issues
+    - ineffassign     # Check for inefficient assignments
+    - maligned        # Check for struct alignment
+    - staticcheck     # Advanced static analysis
+
+    # Bug detection
+    - deadcode        # Check for dead code
+    - structcheck     # Check for unused struct fields
+    - typecheck       # Check for type issues
+    - asciicheck      # Check for non-ASCII identifiers
+    - bidichk         # Check for bidirectional Unicode
+    - contextcheck    # Check for context usage
+    - decorder        # Check for decoder usage
+    - durationcheck   # Check for duration usage
+    - errorlint       # Check for error usage
+    - exhaustive      # Check for exhaustive switch statements
+    - exportloopref   # Check for loop variable capture
+    - forbidigo       # Check for forbidden identifiers
+    - funlen          # Check function length
+    - gci             # Check import grouping
+    - ginkgolinter    # Check Ginkgo test style
+    - goerr113        # Check error comparisons
+    - godot           # Check for Godot style comments
+    - goheader        # Check for file headers
+    - gomnd           # Check for magic numbers
+    - goprintffuncname # Check Printf function names
+    - gosimple        # Check for simplifications
+    - ifshort         # Check for if statement style
+    - importas        # Check for import aliases
+    - interfacer      # Check for interface usage
+    - loggercheck     # Check for logger usage
+    - nilerr          # Check for nil errors
+    - nilnil          # Check for nil comparisons
+    - noctx           # Check for context usage
+    - nolintlint      # Check for nolint comments
+    - nonamedreturns  # Check for named returns
+    - nosnakecase     # Check for snake case
+    - paralleltest    # Check for parallel tests
+    - promlinter      # Check Prometheus metrics
+    - reassign        # Check for variable reassignment
+    - rowserrcheck    # Check for SQL row errors
+    - sloglint        # Check for Slog usage
+    - spancheck       # Check for OpenTelemetry spans
+    - tagalign        # Check for struct tag alignment
+    - tagliatelle     # Check for struct tag usage
+    - tenv            # Check for environment variable usage
+    - testableexamples # Check for testable examples
+    - testifylint     # Check for testify usage
+    - thelper         # Check for test helpers
+    - tparallel       # Check for parallel test usage
+    - unparam         # Check for unused function parameters
+    - usestdlibvars   # Check for standard library variable usage
+    - wastedassign    # Check for wasted assignments
+    - whitespace      # Check for whitespace issues
+    - wrapcheck       # Check for error wrapping
+    - wsl             # Check for whitespace in lines
+
+linters-settings:
+  # Customize linter settings
+  gocyclo:
+    min-complexity: 15  # Minimum cyclomatic complexity to report
+
+  gocognit:
+    min-complexity: 30  # Minimum cognitive complexity to report
+
+  dupl:
+    threshold: 100      # Minimum tokens to consider as duplicate
+
+  lll:
+    line-length: 120    # Maximum line length
+    tab-length: 4
+
+  gocritic:
+    enabled-tags:
+      - diagnostic
+      - experimental
+      - opinionated
+      - performance
+      - security
+      - style
+    disabled-tags:
+      - meta
+
+  gosec:
+    # Security rules to enable
+    includes:
+      - G101  # Look for hardcoded credentials
+      - G102  # Bind to all interfaces
+      - G103  # Audit the use of unsafe block
+      - G104  # Audit errors not checked
+      - G106  # Audit the use of ssh.InsecureIgnoreHostKey
+      - G107  # Url provided to HTTP request without timeout
+      - G108  # Profiling endpoint automatically exposed on port 6060
+      - G201  # SQL query construction using format string
+      - G202  # SQL query construction using string concatenation
+      - G203  # Use of unchecked type assertion
+      - G204  # Audit the use of Fprintf with dynamic first argument
+      - G301  # Poor file permissions used when creating a file
+      - G302  # Poor file permissions used when creating a directory
+      - G304  # Potential file inclusion
+      - G306  # Poor file permissions used when writing to a file
+      - G307  # Deferring unsafe method "Close" on type "*os.File"
+      - G401  # Detect the use of DES, RC4, MD5 or SHA1
+      - G402  # Look for TLS InsecureSkipVerify
+      - G403  # Ensure safe usage of JWKS endpoint
+      - G404  # Insecure random number source (rand)
+      - G501  # Blacklisted import: crypto/md5
+      - G502  # Blacklisted import: crypto/des
+      - G503  # Blacklisted import: crypto/rc4
+      - G504  # Blacklisted import: net/http/cgi
+      - G505  # Blacklisted import: crypto/sha1
+      - G601  # Implicit use of untrusted input
+
+    excludes:
+      - G101  # Allow hardcoded credentials in tests
+      - G402  # Allow InsecureSkipVerify in tests
+
+  goimports:
+    local-prefixes: github.com/hostpanel22/security-hostmk22-enterprise
+
+  goheader:
+    values:
+      const:
+        LICENSE: Apache-2.0
+    template: |
+      // Copyright {{YEAR}} HostMK Team
+      //
+      // Licensed under the Apache License, Version 2.0 (the "License");
+      // you may not use this file except in compliance with the License.
+      // You may obtain a copy of the License at
+      //
+      //     http://www.apache.org/licenses/LICENSE-2.0
+      //
+      // Unless required by applicable law or agreed to in writing, software
+      // distributed under the License is distributed on an "AS IS" BASIS,
+      // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+      // See the License for the specific language governing permissions and
+      // limitations under the License.
+
+  funlen:
+    lines: 100       # Maximum function length
+    statements: 50    # Maximum number of statements
+
+  godot:
+    # Check for Godot style comments (comments ending with a period)
+    scope: all
+    exclude:
+      - test
+
+  gomnd:
+    # Check for magic numbers
+    settings:
+      mnd:
+        # Ignore numbers in test files
+        ignore-numbers:
+          - '0'
+          - '1'
+          - '2'
+          - '10'
+          - '100'
+          - '1000'
+        # Ignore specific patterns
+        ignored-patterns:
+          - '^[0-9]+$'
+
+  nolintlint:
+    # Check for nolint comments
+    allow-leading-comment: true
+    allow-unused: false
+    require-explanation: true
+
+  testpackage:
+    # Check for test package naming
+    allow-regex: '^test$|^_test$'
+
+issues:
+  # Exclude specific issues
+  exclude:
+    # Allow TODO comments
+    - text: "TODO:"
+      linter: godot
+
+    # Allow FIXME comments
+    - text: "FIXME:"
+      linter: godot
+
+    # Allow XXX comments
+    - text: "XXX:"
+      linter: godot
+
+    # Allow nolint directives
+    - text: "//nolint"
+      linter: nolintlint
+
+  # Maximum issues per linter
+  max-issues-per-linter: 0
+
+  # Maximum issues total
+  max-issues-total: 0
+
+  # New issues only
+  new: true
+
+  # Fix: only report new issues
+  fix: true
+
+severity:
+  # Default severity for linters
+  default-severity: error
+
+  # Custom severity per linter
+  linter-severities:
+    godot: warning
+    stylecheck: warning
+    gocyclo: warning
+    gocognit: warning

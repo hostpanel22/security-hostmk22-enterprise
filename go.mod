@@ -1,4 +1,4 @@
-module github.com/hostpanel22/security-hostmk22-enterprise
+module github.com/azezaz/HostMK-Security-Framework
 
 go 1.26.5
 

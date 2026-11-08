@@ -11,7 +11,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/hostpanel22/security-hostmk22-enterprise/core/security"
+	"github.com/azezaz/HostMK-Security-Framework/core/security"
 )
 
 func main() {
