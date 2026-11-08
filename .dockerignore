@@ -1,0 +1,65 @@
+# Dependencies
+vendor/
+go.mod
+go.sum
+
+# Build outputs
+dist/
+build/
+bin/
+
+# IDE
+.vscode/
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Git
+.git/
+.gitignore
+
+# Logs
+logs/
+*.log
+
+# Test
+coverage/
+coverage.out
+coverage.html
+
+# Environment
+.env
+.env.*
+!.env.example
+config.yaml
+config.example.yaml
+
+# Documentation
+docs/
+*.md
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.swp
+
+# Docker
+Dockerfile
+.dockerignore
+
+# GitHub
+.github/
+
+# Go
+*.go:zone.identifier
+_test/
+
+# Makefile
+Makefile
