@@ -3,8 +3,8 @@ package api
 import (
 	"io/fs"
 	"net/http"
-	"strings"
 
+	"github.com/azezaz/HostMK-Security-Framework/core/security"
 	"github.com/azezaz/HostMK-Security-Framework/internal/api/handlers"
 	"github.com/azezaz/HostMK-Security-Framework/internal/api/middleware"
 	"github.com/azezaz/HostMK-Security-Framework/internal/web"
@@ -55,24 +55,27 @@ func NewRouter(api *handlers.API) http.Handler {
 		})
 	}
 
+	// Build security middleware chain
+	
+	securityMiddleware := security.BuildSecureMiddleware(security.GetSecurityConfig(security.SecurityLevelProduction))
+
 	var handler http.Handler = mux
+	
+	// Apply security middleware first
+	handler = securityMiddleware(handler)
+	
+	// Then apply application-specific middleware
 	handler = middleware.Authenticate(api.Tokens, api.Store)(handler)
 	handler = middleware.RateLimit(middleware.SettingsRateLimitProvider{Reader: api.Store})(handler)
 	handler = middleware.StructuredLogging(api.Log)(handler)
 	handler = middleware.Recovery(handler)
 	handler = otelhttp.NewHandler(handler, "hostmk.http")
-	handler = securityHeaders(handler)
+	
 	return handler
 }
 
+// securityHeaders is kept for backward compatibility but now uses the security package
 func securityHeaders(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("X-Content-Type-Options", "nosniff")
-		w.Header().Set("X-Frame-Options", "DENY")
-		w.Header().Set("Referrer-Policy", "no-referrer")
-		if strings.HasPrefix(r.URL.Path, "/api/") {
-			w.Header().Set("Cache-Control", "no-store")
-		}
-		next.ServeHTTP(w, r)
-	})
+	config := security.DefaultHeadersConfig()
+	return security.SecurityHeaders(config)(next)
 }
