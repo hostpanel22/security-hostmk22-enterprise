@@ -69,6 +69,19 @@ func RequireResourceAction(store *persistence.Store, resource, action string) fu
 				return
 			}
 			if id.APIKeyID != "" {
+				key, err := store.GetAPIKeyByID(r.Context(), id.APIKeyID)
+				if err != nil || !key.IsActive() {
+					response.Unauthorized(w, "invalid api key")
+					return
+				}
+				scope := resource
+				if action != "" {
+					scope = resource + "." + action
+				}
+				if !key.HasScope("*") && !key.HasScope(resource) && !key.HasScope(scope) {
+					response.Forbidden(w, "missing api key scope")
+					return
+				}
 				next.ServeHTTP(w, r)
 				return
 			}

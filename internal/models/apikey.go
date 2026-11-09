@@ -63,6 +63,29 @@ func (k *APIKey) IsActive() bool {
 	return true
 }
 
+func (k *APIKey) HasScope(scope string) bool {
+	if k == nil {
+		return false
+	}
+	scope = strings.TrimSpace(strings.ToLower(scope))
+	if scope == "" {
+		return false
+	}
+	for _, candidate := range k.Scopes {
+		candidate = strings.TrimSpace(strings.ToLower(candidate))
+		if candidate == "" {
+			continue
+		}
+		if candidate == "*" || candidate == "all" {
+			return true
+		}
+		if candidate == scope {
+			return true
+		}
+	}
+	return false
+}
+
 func (k *APIKey) PublicView() APIKey {
 	if k == nil {
 		return APIKey{}
