@@ -46,8 +46,8 @@ func Authenticate(tokens auth.Tokens, store *persistence.Store) func(http.Handle
 			}
 
 			user, err := store.GetUser(r.Context(), claims.UserID)
-			if err != nil || !user.CanAuthenticate() {
-				response.Unauthorized(w, "user is not active")
+			if err != nil || !user.CanAuthenticate() || claims.TenantID == "" || user.TenantID != claims.TenantID {
+				response.Unauthorized(w, "invalid access token")
 				return
 			}
 
@@ -64,21 +64,19 @@ func RequireResourceAction(store *persistence.Store, resource, action string) fu
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			id, ok := identity.FromContext(r.Context())
-			if !ok {
+			if !ok || id.TenantID == "" {
 				response.Unauthorized(w, "authentication required")
 				return
 			}
 			if id.APIKeyID != "" {
 				key, err := store.GetAPIKeyByID(r.Context(), id.APIKeyID)
-				if err != nil || !key.IsActive() {
+				if err != nil || !key.IsActive() || key.TenantID != id.TenantID {
 					response.Unauthorized(w, "invalid api key")
 					return
 				}
-				scope := resource
-				if action != "" {
-					scope = resource + "." + action
-				}
-				if !key.HasScope("*") && !key.HasScope(resource) && !key.HasScope(scope) {
+				// Scopes are exact resource.action grants; no implicit resource-wide or wildcard grants.
+				scope := resource + "." + action
+				if action == "" || !key.HasScope(scope) {
 					response.Forbidden(w, "missing api key scope")
 					return
 				}
@@ -90,9 +88,9 @@ func RequireResourceAction(store *persistence.Store, resource, action string) fu
 				next.ServeHTTP(w, r)
 				return
 			}
-			allowed, err := store.UserHasResourceAction(r.Context(), id.UserID, resource, action)
+			allowed, err := store.UserHasResourceActionForTenant(r.Context(), id.UserID, id.TenantID, resource, action)
 			if err != nil || !allowed {
-				allowedByName, nameErr := store.UserHasPermission(r.Context(), id.UserID, resource+"."+action)
+				allowedByName, nameErr := store.UserHasPermissionForTenant(r.Context(), id.UserID, id.TenantID, resource+"."+action)
 				if nameErr != nil || !allowedByName {
 					response.Forbidden(w, "missing permission")
 					return

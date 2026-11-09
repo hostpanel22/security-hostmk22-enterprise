@@ -72,14 +72,7 @@ func (k *APIKey) HasScope(scope string) bool {
 		return false
 	}
 	for _, candidate := range k.Scopes {
-		candidate = strings.TrimSpace(strings.ToLower(candidate))
-		if candidate == "" {
-			continue
-		}
-		if candidate == "*" || candidate == "all" {
-			return true
-		}
-		if candidate == scope {
+		if strings.TrimSpace(strings.ToLower(candidate)) == scope {
 			return true
 		}
 	}
